@@ -10,6 +10,9 @@
 const int TABSIZE = 4;
 const int MAXSIZE = 1024;
 
+/* Replace tabs with spaces in a text file
+ */
+
 void detab (int n) {
 	int c;
 
@@ -62,7 +65,10 @@ void entab (int n) {
 	}
 }
 
-// stateful
+/* Fold lines of a text beyond a given column limit. 
+ * Do not split the words, but put them in next line
+ */
+
 void fold_lines (int limit, int tabsize) {
 	const int IN = 1, OUT = 0;
 	int c, col = 0, word_length = 0, state = OUT;
@@ -109,6 +115,10 @@ void fold_lines (int limit, int tabsize) {
 
 	free (word_buffer);
 }
+
+/* Remove comments from a c/c++ source code
+ * usage: ./kr_1d < source.c > newsource.c
+ */
 
 void uncomment_cpp () {
 	const int OUT = 0, LINE = 1, MULTILINE = 2, START = 3, END = 4;
@@ -157,7 +167,7 @@ int char_exists (char c, char * s, int n) {
 /** check rudimentary errors in c program
  * this can be a part of lexer at best. does not check semantics
  * DONE: 
- 	first, second, third bracket matching, 
+ 	first, second, third bracket matching 
  	quotes matching
  	escape characters
  	comments
@@ -168,7 +178,6 @@ typedef enum State {
 } State;
 
 int rudimentary_errors () {
-	// const int ESCAPE = 6, QUOTE = 7, OUT = 8, COMMENT_START = 9, COMMENT = 10, COMMENT_END = 11;
 	int c, index = 0;
 	State state = OUT;
 	char * parens = "(){}[]";
