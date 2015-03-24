@@ -5,6 +5,8 @@
  * github.com/mayukh42
  */
 
+// #define DEBUG 1
+
 const int TABSIZE = 4;
 const int MAXSIZE = 1024;
 
@@ -160,9 +162,15 @@ int char_exists (char c, char * s, int n) {
  	escape characters
  	comments
  */
+
+typedef enum State {
+	ESCAPE, QUOTE, COMMENT_START, COMMENT, COMMENT_END, OUT
+} State;
+
 int rudimentary_errors () {
-	const int FIRST = 0, SECOND = 2, THIRD = 4, ESCAPE = 6, QUOTE = 7, OUT = 8, COMMENT_START = 9, COMMENT = 10, COMMENT_END = 11;
-	int c, index = 0, state = OUT;
+	// const int ESCAPE = 6, QUOTE = 7, OUT = 8, COMMENT_START = 9, COMMENT = 10, COMMENT_END = 11;
+	int c, index = 0;
+	State state = OUT;
 	char * parens = "(){}[]";
 	char * sp_chars = "ntr";
 	int num_sp_chars = 3;
@@ -174,47 +182,60 @@ int rudimentary_errors () {
 		if (index > MAXSIZE)
 			return 0;
 
-		if (state == OUT && (c == parens[FIRST] || c == parens[SECOND] || c == parens[THIRD]))
-			buf[index++] = c;
-		else if (state == OUT && (c == SINGLE_QUOTE || c == DOUBLE_QUOTE)) {
-			buf[index++] = c;
-			state = QUOTE;
-		}
-		else if (state == OUT && c == '/') 
-			state = COMMENT_START;
-		else if (state == COMMENT_START && c == '*') {
-			buf[index++] = '/';
-			buf[index++] = '*';
-			state = COMMENT;
-		}
-		else if (state == COMMENT_START)
-			state = OUT;
-		else if (state == COMMENT && c == '*')
-			state = COMMENT_END;
-		else if (state == COMMENT_END && c == '/') {
-			index--;
-			index--;
-			state = OUT;
-		}
-		else if (state == COMMENT_END)
-			state = COMMENT;
-		else if (state == QUOTE && c == '\\')
-			state = ESCAPE;
-		else if (state == ESCAPE && (c == SINGLE_QUOTE || c == DOUBLE_QUOTE || char_exists (c, sp_chars, num_sp_chars))) 
-			state = QUOTE;
-		else if (state == OUT && (c == parens[FIRST + 1] && buf[index-1] == parens[FIRST]))
-			index--;
-		else if (state == OUT && (c == parens[SECOND + 1] && buf[index-1] == parens[SECOND]))
-			index--;
-		else if (state == OUT && (c == parens[THIRD + 1] && buf[index-1] == parens[THIRD]))
-			index--;
-		else if (state == QUOTE && (c == SINGLE_QUOTE && buf[index-1] == SINGLE_QUOTE)) {
-			index--;
-			state = OUT;
-		}
-		else if (state == QUOTE && (c == DOUBLE_QUOTE && buf[index-1] == DOUBLE_QUOTE)) {
-			index--;
-			state = OUT;
+		switch (state) {
+			case OUT:
+				if (c == parens[0] || c == parens[2] || c == parens[4])
+					buf[index++] = c;
+				else if (c == SINGLE_QUOTE || c == DOUBLE_QUOTE) {
+					buf[index++] = c;
+					state = QUOTE;
+				}
+				else if (c == '/')
+					state = COMMENT_START;
+				else if ((c == parens[1] && buf[index-1] == parens[0]) ||
+					(c == parens[3] && buf[index-1] == parens[2]) ||
+					(c == parens[5] && buf[index-1] == parens[4]))
+					index--;
+				break;
+
+			case COMMENT_START:
+				if (c == '*') {
+					buf[index++] = '/';
+					buf[index++] = '*';
+					state = COMMENT;
+				}
+				else 
+					state = OUT;
+				break;
+
+			case COMMENT:
+				if (c == '*')
+					state = COMMENT_END;
+				break;
+
+			case COMMENT_END:
+				if (c == '/') {
+					index -= 2;
+					state = OUT;
+				}
+				else 
+					state = COMMENT;
+				break;
+
+			case QUOTE:
+				if (c == '\\')
+					state = ESCAPE;	
+				else if ((c == SINGLE_QUOTE && buf[index-1] == SINGLE_QUOTE) ||
+					(c == DOUBLE_QUOTE && buf[index-1] == DOUBLE_QUOTE)) {
+					index--;
+					state = OUT;
+				}
+				break;
+
+			case ESCAPE:
+				if (c == SINGLE_QUOTE || c == DOUBLE_QUOTE || char_exists (c, sp_chars, num_sp_chars))
+					state = QUOTE;
+				break;
 		}
 	}
 
