@@ -1,6 +1,6 @@
 CFLAGS = -Wall -Wextra -g -std=c11 -pedantic-errors
 
-all: ht copy kr_1a kr_1b kr_1c kr_1d
+all: ht copy one_1 one_2 one_3 one_4 two_1
 
 clean:
-	rm -rf *.o *.out ht copy kr_1a kr_1b kr_1c kr_1d
+	rm -rf *.o *.out ht copy one_1 one_2 one_3 one_4 two_1

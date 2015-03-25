@@ -32,7 +32,7 @@ void print_temperatures_reverse_order (temp_conv fn, int lower, int upper, int s
 		printf("\t %3.1f\t %3.1f\n", t * 1.0, fn (t));
 }
 
-// Enter (Return) closes (and flushes) the stream. But Enter is not EOF. Hence after typing one line and hitting Enter, we get the prompt back
+// Enter (Return) closes (and flushes) the stream. But Enter is not EOF. Hence after typing one line and hitting Enter in console, we get the prompt back
 void copy_input_to_output () {
 	int c;
 	while ((c = getchar ()) != EOF)

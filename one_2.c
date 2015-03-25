@@ -5,7 +5,7 @@
  * github.com/mayukh42
  */
 
-// sizeof is a macro; not a function; it requires parens only when the arg is a type, not a variable
+// sizeof is a unary operator, not a function; it requires parens only when the arg is a type instead of a variable
 void test_sizeof_parens () {
 	int x = 42;
 	printf("sizeof without parens: %lu\n", sizeof x);
