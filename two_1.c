@@ -7,6 +7,9 @@
 
 #define SIZE(type) (char *)(&type + 1) - (char *)(&type)
 
+const int HEXSIZE = 16;
+char * hexs_lower = "0123456789abcdef";
+
 int addressing_bits (void * one, void * two) {
 	// printf ("one @ %p, two @ %p\n", &one, &two);		// warning: %p is for void *, not void **. but runs, and shows different addresses for one, two
 	size_t offset = (size_t) &one - (size_t) &two;
@@ -14,12 +17,18 @@ int addressing_bits (void * one, void * two) {
 }
 
 int hex_to_int (char hex) {
-	char * hexs_lower = "0123456789abcdef";
-	char * hexs_upper = "0123456789ABCDEF";
 	for (int i = 0; i < 16; i++)
-		if (hex == hexs_lower[i] || hex == hexs_upper[i])
+		if (hex == hexs_lower[i])
+			return i;
+		else if (i > 9 && hex - 'A' + 'a' == hexs_lower[i])
 			return i;
 	return -1;
+}
+
+char int_to_hex (int i) {
+	if (i >= 0 && i < 16)
+		return hexs_lower[i];
+	return '\0';
 }
 
 char * reverse_str (char * str, int size) {
@@ -30,8 +39,16 @@ char * reverse_str (char * str, int size) {
 	return res;
 }
 
-long htol (char * hexstr, int size) {
+int str_len (char * s) {
+	int i = 0;
+	while (s[i++] != '\0')
+		;
+	return i-1;
+}
+
+long htol (char * hexstr) {
 	long n = 0, index = 0;
+	int size = str_len (hexstr);
 	char * it = reverse_str (hexstr, size);
 	while (it[index] != '\0' && it[index] != 'x' && it[index] != 'X') {
 		char c = it[index];
@@ -49,19 +66,39 @@ long htol (char * hexstr, int size) {
 	return n;
 }
 
-int str_len (char * s) {
-	int i = 0;
-	while (s[i++] != '\0')
-		;
-	return i-1;
+char * ltoh (long n) {
+	char * buf = malloc (HEXSIZE * sizeof (char));
+	int index = 0;
+
+	while (n > 0) {
+		int q = n / 16;
+		int r = n % 16;
+		buf[index++] = int_to_hex (r);
+		n = q;
+	}
+	buf[index++] = 'x';
+	buf[index++] = '0';
+	char * hexstr = reverse_str (buf, index);
+
+	free (buf);
+	return hexstr;
 }
 
 void test_hex () {	
 	int num_hex = 8;
-	char * hexstr[] = {"0x2a", "64", "D4", "FFFF", "0Xff", "deadbeef", "CAFEBABE", "0ff1ce"};
+	char * hexinp[] = {"0x2a", "64", "D4", "FFFF", "0Xff", "deadbeef", "CAFEBABE", "0ff1ce"};
+	char ** hexout = malloc (num_hex * sizeof (char *));
+	long xs[] = {0,0,0,0,0,0,0,0};
+
+	for (int i = 0; i < num_hex; i++) {
+		xs[i] = htol (hexinp[i]);
+		hexout[i] = ltoh (xs[i]);
+		printf ("%s to long = %ld; back to hex = %s\n", hexinp[i], xs[i], hexout[i]);
+	}
 
 	for (int i = 0; i < num_hex; i++)
-		printf ("%s to long = %ld\n", hexstr[i], htol (hexstr[i], str_len (hexstr[i])));
+		free (hexout[i]);
+	free (hexout);
 }
 
 void test_sizes () {	
