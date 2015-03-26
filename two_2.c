@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /** author: mayukh
  * github.com/mayukh42
  */
 
 const int STRSIZE = 128;
+const int ARRAYSIZE = 8;
 
 void squeeze (char * s, char c) {
 	int j = 0;
@@ -52,6 +54,117 @@ int any (char * s1, char * s2) {
 	return j;
 }
 
+char * reverse_str (char * str, int size) {
+	char * res = malloc ((size + 1) * sizeof (char));
+	for (int i = size-1; i >= 0; i--) 
+		res[i] = str[size-1-i];
+	res[size] = '\0';
+	return res;
+}
+
+char * to_bit_string (int n) {
+	char * bits = malloc (33 * sizeof (char));
+	int i = 0;
+	if (! n)
+		bits[i++] = '0';
+
+	while (n > 0) {
+		int q = n >> 1;
+		int r = n & 1;
+		bits[i++] = r ? '1' : '0';
+		n = q;
+	}
+	bits[i] = '\0';
+	char * bit_str = reverse_str (bits, i);
+	free (bits);
+	return bit_str;
+}
+
+/** return n bits of x starting from p, where 0 is the right-most index
+ * assume p >= n
+ */
+
+unsigned getbits (unsigned x, unsigned p, unsigned n) {
+	if (! n)			// nothing to do
+		return x;
+	x = x >> (p+1 - n);	// right-align n bits starting from original index p in x
+	x = x & ~(~0 << n);	// ~0 << n = all 1's except last n bits = 0. complimenting that gives all 0's except last n bits = 1
+	return x;
+}
+
+unsigned setbits (unsigned x, unsigned p, unsigned n, unsigned y) {
+	if (! n)
+		return x;
+	y = y & ~(~0 << n);	// ~0 << n: 1...10..0 (last n bits = 0). So, and-ing its compliment with y gives last n bits of y, and everything else = 0
+	y = y << (p+1 - n);	// move the last n bits of y into position
+	return x | y;
+}
+
+unsigned invertbits (unsigned x, unsigned p, unsigned n) {
+	if (! n)
+		return x;
+	unsigned mask = ~(~0 << (p+1));		// 0..01..1
+	mask = mask & (~0 << (p+1 - n));	// 1..10..0
+	return x ^ mask;					// x ^ 0..01..10..0, such that there are n 1's in the middle. 0 is the identity for XOR, and 1 inverts the bits
+}
+
+/** Right & Left rotation of bits
+ * For any length of bit string (of unsigned type). 
+ * to_bit_string () ignores the leftmost '0' bits
+ */
+
+unsigned rightrot (unsigned x, unsigned n) {
+	char * bits = to_bit_string (x);	
+	unsigned p = strlen (bits);
+	
+	unsigned xr = x & ~(~0 << n);
+	xr = xr << (p - n);
+	x = x >> n;
+	
+	free (bits);
+	return xr | x;
+}
+
+unsigned leftrot (unsigned x, unsigned n) {
+	char * bits = to_bit_string (x);	
+	unsigned p = strlen (bits);
+	
+	unsigned xl = x >> (p - n);
+	x = x & ~(~0 << (p - n));
+	x = x << n;
+	
+	free (bits);
+	return x | xl;
+}
+
+void run_bit_tests () {
+	int xs[] = {42, 28, 10, 16, 356, 255, 31, 1000};
+
+	for (int i = 0; i < ARRAYSIZE; i++) {
+		char * bits1 = to_bit_string (xs[i]);
+
+		// leftrot		
+		char * bits2 = to_bit_string (leftrot (xs[i], 3));
+
+		// rightrot
+		// char * bits2 = to_bit_string (rightrot (xs[i], 3));
+
+		// invertbits
+		// char * bits2 = to_bit_string (invertbits (xs[i], 3, 3));
+
+		// setbits
+		// char * bits2 = to_bit_string (setbits (xs[i], 3, 3, 15));
+
+		// getbits
+		// char * bits2 = to_bit_string (getbits (xs[i], 3, 3));
+		
+		printf ("%d in bits = %s, after modification = %s\n", xs[i], bits1, bits2);
+		
+		free (bits1);
+		free (bits2);
+	}
+}
+
 void run_char_tests () {
 	char ds[] = "hello";
 	char * vowels = "aeiou";
@@ -77,7 +190,8 @@ void run_char_tests () {
 }
 
 void run_tests () {
-	run_char_tests ();
+	// run_char_tests ();
+	run_bit_tests ();
 }
 
 int main () {
