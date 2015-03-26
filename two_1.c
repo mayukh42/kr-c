@@ -84,6 +84,32 @@ char * ltoh (long n) {
 	return hexstr;
 }
 
+int char_to_int (char c) {
+	if (c >= '0' && c <= '9')
+		return c - 48;
+	else 
+		printf ("'%c' is not a valid integer\n", c);
+	return -1;
+}
+
+char int_to_char (int i) {
+	if (i >= 0 && i <= 9)
+		return '0' + i;
+	else 
+		printf ("%d is not a valid integer\n", i);
+	return '\0';
+}
+
+void test_conversions () {
+	char * str = "012345";
+	for (int i = 0; str[i] != '\0'; i++) {
+		int j = char_to_int (str[i]);
+		char c = int_to_char (j);
+		if (j != -1 && c != '\0')
+			printf("'%c' to int = %d; back to char = '%c'\n", str[i], j, c);
+	}
+}
+
 void test_hex () {	
 	int num_hex = 8;
 	char * hexinp[] = {"0x2a", "64", "D4", "FFFF", "0Xff", "deadbeef", "CAFEBABE", "0ff1ce"};
@@ -116,7 +142,8 @@ void test_sizes () {
 
 void run_tests () {
 	// test_sizes ();
-	test_hex ();
+	// test_hex ();
+	test_conversions ();
 }
 
 int main () {
