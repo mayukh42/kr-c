@@ -137,7 +137,6 @@ unsigned leftrot (unsigned x, unsigned n) {
 	return x | xl;
 }
 
-<<<<<<< HEAD
 /** Right Rotation of string
  * ("cisco", 2) = "cocis"
  * For left rotation, pass a negative shift
@@ -163,8 +162,6 @@ void rightrot_str (char * s, int shift) {
 	free (buf);
 }
 
-=======
->>>>>>> c1208391dcf84f781e365fdf100d32f4f0ae2feb
 void run_bit_tests () {
 	int xs[] = {42, 28, 10, 16, 356, 255, 31, 1000};
 
@@ -221,13 +218,8 @@ void run_char_tests () {
 }
 
 void run_tests () {
-<<<<<<< HEAD
 	run_char_tests ();
 	// run_bit_tests ();
-=======
-	// run_char_tests ();
-	run_bit_tests ();
->>>>>>> c1208391dcf84f781e365fdf100d32f4f0ae2feb
 }
 
 int main () {
