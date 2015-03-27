@@ -85,7 +85,7 @@ char * to_bit_string (int n) {
  */
 
 unsigned getbits (unsigned x, unsigned p, unsigned n) {
-	if (! n)			// nothing to do
+	if (! n)	// nothing to do
 		return x;
 	x = x >> (p+1 - n);	// right-align n bits starting from original index p in x
 	x = x & ~(~0 << n);	// ~0 << n = all 1's except last n bits = 0. complimenting that gives all 0's except last n bits = 1
@@ -137,6 +137,30 @@ unsigned leftrot (unsigned x, unsigned n) {
 	return x | xl;
 }
 
+// counts the 1-bits in x
+int bitcount (unsigned x) {
+	int bits = 0;
+	while (x > 0) {
+		if ((x & 1) == 1)
+			bits++;
+		x = x >> 1;
+	}
+	return bits;
+}
+
+/** using two's compliment property
+ * x & x-1 = rightmost 1 turned off in x
+ */
+
+int bitcount2 (unsigned x) {
+	int bits = 0;
+	while (x > 0) {
+		bits++;
+		x &= (x-1);
+	}
+	return bits;
+}
+
 /** Right Rotation of string
  * ("cisco", 2) = "cocis"
  * For left rotation, pass a negative shift
@@ -162,14 +186,30 @@ void rightrot_str (char * s, int shift) {
 	free (buf);
 }
 
+// convert lowercase to uppercase
+void lower (char * s) {
+	for (int i = 0; s[i] != '\0'; i++)
+		s[i] = s[i] >= 'A' && s[i] <= 'Z' ? s[i] - 'A' + 'a' : s[i];
+}
+
+// convert uppercase to lowercase
+void upper (char * s) {
+	for (int i = 0; s[i] != '\0'; i++)
+		s[i] = s[i] >= 'a' && s[i] <= 'z' ? s[i] - 'a' + 'A' : s[i];
+}
+
 void run_bit_tests () {
 	int xs[] = {42, 28, 10, 16, 356, 255, 31, 1000};
 
 	for (int i = 0; i < ARRAYSIZE; i++) {
 		char * bits1 = to_bit_string (xs[i]);
 
+		// bitcount
+		printf ("bitcount for %d (%s) = %d\n", xs[i], bits1, bitcount (xs[i]));
+		printf ("bitcount2 for %d (%s) = %d\n", xs[i], bits1, bitcount2 (xs[i]));
+
 		// leftrot		
-		char * bits2 = to_bit_string (leftrot (xs[i], 3));
+		// char * bits2 = to_bit_string (leftrot (xs[i], 3));
 
 		// rightrot
 		// char * bits2 = to_bit_string (rightrot (xs[i], 3));
@@ -183,10 +223,10 @@ void run_bit_tests () {
 		// getbits
 		// char * bits2 = to_bit_string (getbits (xs[i], 3, 3));
 		
-		printf ("%d in bits = %s, after modification = %s\n", xs[i], bits1, bits2);
+		// printf ("%d in bits = %s, after modification = %s\n", xs[i], bits1, bits2);
 		
 		free (bits1);
-		free (bits2);
+		// free (bits2);
 	}
 }
 
@@ -213,8 +253,14 @@ void run_char_tests () {
 	// int first_occurrence = any (ds, vowels);
 	// printf ("a char from %s was found in %s at %d\n", vowels, ds, first_occurrence);
 
-	rightrot_str (ds, -2);
-	printf ("%s\n", ds);
+	// rightrot_str (ds, -2);
+	// printf ("%s\n", ds);
+
+	lower (ds);
+	printf ("to lower = %s\n", ds);
+
+	upper (ds);
+	printf ("to upper = %s\n", ds);
 }
 
 void run_tests () {
