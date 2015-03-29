@@ -1,17 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 /** author: mayukh
  * github.com/mayukh42
  */
 
-const int ARRAYSIZE = 256;
+const int ARRAYSIZE = 128;
+const int NUM_STRINGS = 10;
 unsigned long next = 1;
 
 unsigned prg_short_range () {
 	next = next * 1103515245 + 12345;
-	return (next / 65536) % 255;
+	return (next / 65536) % 16;
 }
 
 void print_array (int * xs, int size) {
@@ -101,6 +103,69 @@ void escape_rev (char * s, char * t) {
 	t[j] = '\0';
 }
 
+/** stoi: alternate atoi
+ * at most one sign allowed
+ * pseudo-stateful
+ */
+
+int stoi (char * s) {
+	int n = 0, i = 0, num_signs = 0, negative = 0, error = 0;
+	while (s[i] == ' ' || s[i] == '\t' || s[i] == '\n')
+		i++;
+	while (s[i] != '\0') {
+		switch (s[i]) {
+			case '+':
+				num_signs++;
+				if (num_signs > 1)
+					error++;
+				break;
+
+			case '-':
+				num_signs++;
+				if (num_signs > 1)
+					error++;
+				negative = 1;
+				break;
+
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				n = n * 10 + (s[i] - 48);	// ASCII ('0') = 48
+				break;
+
+			default:
+				error++;	// fail it
+				break;
+		}
+		if (error > 0)
+			break;
+		i++;
+	}
+	if (error > 0)
+		return -999999;
+	else if (negative)
+		return -n;
+	else 
+		return n;
+}
+
+void run_stoi_tests () {
+	char * numbers[] = {"233", "fox", "42", "-576", "+1025", "--102", "++144", "+-233", "  -273", "-27 3"};
+	int * xs = malloc (NUM_STRINGS * sizeof (int));
+	for (int i = 0; i < NUM_STRINGS; i++) {
+		xs[i] = stoi (numbers[i]);
+		printf ("%s => %d\n", numbers[i], xs[i]);
+	}
+	free (xs);
+}
+
 void run_escape_tests () {
 	char cs[] = "Alice in Wonderland\nBy\tLewis Carroll\n\\ is called backslash";
 	char ds[ARRAYSIZE];
@@ -125,7 +190,10 @@ void run_binary_search_tests () {
 
 	int size = ARRAYSIZE;
 	// print_array (xs, size);
-	int element = 1650;
+	/* 
+	[ 6 20 21 32 43 54 56 67 71 77 90 105 117 129 130 137 138 153 154 168 174 176 191 198 205 211 218 227 237 245 257 266 276 282 285 296 298 303 304 312 324 328 333 348 355 369 374 385 395 397 406 414 426 429 439 445 459 474 483 492 507 522 537 543 557 560 568 581 594 604 618 624 634 638 644 658 670 679 692 706 721 727 728 728 728 739 754 755 763 768 768 773 782 794 797 810 820 831 839 848 850 853 855 868 874 889 899 904 906 912 915 923 932 934 935 949 961 963 971 972 984 986 992 997 998 1004 1019 1026 ]
+	*/
+	int element = 174;
 
 	// measure time (alternate to $ time ./three_1)
 	clock_t start, stop;
@@ -140,7 +208,8 @@ void run_binary_search_tests () {
 
 void run_tests () {
 	// run_binary_search_tests ();
-	run_escape_tests ();
+	// run_escape_tests ();
+	run_stoi_tests ();
 }
 
 int main () {

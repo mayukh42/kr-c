@@ -48,27 +48,34 @@ int str_len (char * s) {
 
 long htol (char * hexstr) {
 	long n = 0, index = 0;
-	int size = str_len (hexstr);
-	char * it = reverse_str (hexstr, size);
-	while (it[index] != '\0' && it[index] != 'x' && it[index] != 'X') {
-		char c = it[index];
-		int i = hex_to_int (c);
 
-		if (i == -1) {
-			printf ("%s is not a valid hex string\n", hexstr);
-			return -1;
+	while (hexstr[index] != '\0') {
+		int hexsym = (hexstr[index] == '0' && index == 0) || ((hexstr[index] == 'x' || hexstr[index] == 'X') && index == 1);
+		if (hexsym)
+			;
+		else {
+			int i = hex_to_int (hexstr[index]);
+
+			if (i == -1) {
+				printf ("%s is not a valid hex string\n", hexstr);
+				return -1;
+			}
+
+			n = n * 16 + i;
 		}
-
-		n += i * (1L << (4 * index));
 		index++;
 	}
-	free (it);
 	return n;
 }
 
 char * ltoh (long n) {
 	char * buf = malloc (HEXSIZE * sizeof (char));
 	int index = 0;
+
+	if (n < 0) {
+		buf[0] = '\0';
+		return buf;
+	}
 
 	while (n > 0) {
 		int q = n / 16;
@@ -112,7 +119,7 @@ void test_conversions () {
 
 void test_hex () {	
 	int num_hex = 8;
-	char * hexinp[] = {"0x2a", "64", "D4", "FFFF", "0Xff", "deadbeef", "CAFEBABE", "0ff1ce"};
+	char * hexinp[] = {"0x2a", "64", "D4", "oxtal", "0Xff", "deadbeef", "CAFEBABE", "0ff1ce"};
 	char ** hexout = malloc (num_hex * sizeof (char *));
 	long xs[] = {0,0,0,0,0,0,0,0};
 
@@ -142,8 +149,8 @@ void test_sizes () {
 
 void run_tests () {
 	// test_sizes ();
-	// test_hex ();
-	test_conversions ();
+	test_hex ();
+	// test_conversions ();
 }
 
 int main () {
