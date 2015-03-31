@@ -127,16 +127,8 @@ int stoi (char * s) {
 				negative = 1;
 				break;
 
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9':
+			case '0': case '1': case '2': case '3': case '4':
+			case '5': case '6': case '7': case '8': case '9':
 				n = n * 10 + (s[i] - 48);	// ASCII ('0') = 48
 				break;
 
@@ -156,12 +148,45 @@ int stoi (char * s) {
 		return n;
 }
 
+// subtly stateful
+void itos (int n, char * s) {
+	int i = 0, sign = n >= 0, extreme = 0;
+
+	if (n == -n) {
+		n = -(n + 1);
+		extreme = 1;
+	}
+	else if (n < 0)
+		n = -n;
+
+	while (n > 0) {
+		int q = n / 10;
+		int r = n % 10;
+		s[i++] = extreme ? r+1 + '0' : r + '0';
+		extreme = 0;
+		n = q;
+	}
+	if (! sign)
+		s[i++] = '-';
+
+	for (int j = 0; j < i/2; j++) {
+		char tmp = s[j];
+		s[j] = s[i-j-1];
+		s[i-j-1] = tmp;
+	}
+	s[i] = '\0';
+}
+
 void run_stoi_tests () {
-	char * numbers[] = {"233", "fox", "42", "-576", "+1025", "--102", "++144", "+-233", "  -273", "-27 3"};
+	char * numbers[] = {"233", "fox", "-2147483648", "-576", "+1025", "--102", "++144", "+-233", "  -273", "-27 3"};
 	int * xs = malloc (NUM_STRINGS * sizeof (int));
 	for (int i = 0; i < NUM_STRINGS; i++) {
 		xs[i] = stoi (numbers[i]);
-		printf ("%s => %d\n", numbers[i], xs[i]);
+		char * str = malloc (ARRAYSIZE * sizeof (int));
+		itos (xs[i], str);
+
+		printf ("%s => %d => %s\n", numbers[i], xs[i], str);
+		free (str);
 	}
 	free (xs);
 }

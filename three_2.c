@@ -63,7 +63,7 @@ void expand (char * s, char * t) {
 }
 
 void run_expand_tests () {	
-	char * s = "-a-b-c";
+	char * s = "-a-b-cA-E";
 	char * t = malloc (BUFFER_SIZE * sizeof (char));
 
 	expand (s, t);
