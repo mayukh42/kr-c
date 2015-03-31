@@ -177,16 +177,58 @@ void itos (int n, char * s) {
 	s[i] = '\0';
 }
 
+/** padded version of itos
+ * fill with space as pad char if the strlen (s) < width
+ * the 'format' problem
+ */
+
+void itos_padded (int n, char * s, int width) {
+	int i = 0, sign = n >= 0, extreme = 0;
+
+	if (n == -n) {
+		n = -(n + 1);
+		extreme = 1;
+	}
+	else if (n < 0)
+		n = -n;
+
+	while (n > 0) {
+		int q = n / 10;
+		int r = n % 10;
+		s[i++] = extreme ? r+1 + '0' : r + '0';
+		extreme = 0;
+		n = q;
+	}
+
+	if (! sign)
+		s[i++] = '-';
+
+	while (i < width)
+		s[i++] = ' ';
+
+	for (int j = 0; j < i/2; j++) {
+		char tmp = s[j];
+		s[j] = s[i-j-1];
+		s[i-j-1] = tmp;
+	}
+	s[i] = '\0';
+}
+
 void run_stoi_tests () {
 	char * numbers[] = {"233", "fox", "-2147483648", "-576", "+1025", "--102", "++144", "+-233", "  -273", "-27 3"};
 	int * xs = malloc (NUM_STRINGS * sizeof (int));
 	for (int i = 0; i < NUM_STRINGS; i++) {
 		xs[i] = stoi (numbers[i]);
-		char * str = malloc (ARRAYSIZE * sizeof (int));
-		itos (xs[i], str);
+		char * str = malloc (ARRAYSIZE * sizeof (char));
+		char * str_padded = malloc (ARRAYSIZE * sizeof (char));
 
-		printf ("%s => %d => %s\n", numbers[i], xs[i], str);
+		itos (xs[i], str);
+		itos_padded (xs[i], str_padded, 10);
+
+		printf ("%s => %d => %s => (padded) |%s|\n", numbers[i], xs[i], str, str_padded);
+
 		free (str);
+		free (str_padded);
 	}
 	free (xs);
 }
