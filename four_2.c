@@ -13,6 +13,11 @@ typedef struct Stack {
 	int index;
 } Stack;
 
+/** push () and pop () for the stack
+ * push () shifts the index to one after the top
+ * pop () must take into account this off by one index
+ */
+
 void push (Stack * stack, double number) {
 	if (stack->index < MAXSIZE)
 		stack->arr[stack->index++] = number;
@@ -25,6 +30,7 @@ double pop (Stack * stack) {
 		return 0.0;
 }
 
+// helper function to debug the stack
 void print_stack (Stack * stack) {
 	int idx = stack->index;
 	while (idx >= 0) {
@@ -33,8 +39,15 @@ void print_stack (Stack * stack) {
 	}
 }
 
+/** Polish Calculator == Postfix Expression Evaluator 
+ * Supports double/ negative numbers. Stateful
+ * Operators: +, -, *, /, %
+ * TODO:
+ 	Handle errors correctly
+ */
+
 void polish_calc (const char * expr) {
-	const int NUM = 1, OUT = 0;
+	const int NUM = 1, OUT = 0, NEG = -1;
 	int state = OUT, i = 0, j = 0;
 	char * num_str = malloc (MAXWIDTH * sizeof (char));
 
@@ -58,21 +71,23 @@ void polish_calc (const char * expr) {
 			state = OUT;
 			j = 0;
 		}
-		else if (state == OUT && expr[i] == '+') {
-			double num2 = pop (stack);
-			double num1 = pop (stack);
-			push (stack, num1 + num2);
+		else if (state == OUT && expr[i] == '+')
+			push (stack, pop (stack) + pop (stack));
+		else if (state == OUT && expr[i] == '-') 
+			state = NEG;
+		else if (state == NEG && expr[i] >= '0' && expr[i] <= '9') {
+			state = NUM;
+			num_str[j++] = '-';
+			num_str[j++] = expr[i];
 		}
-		else if (state == OUT && expr[i] == '-') {
+		else if (state == NEG) {
 			double num2 = pop (stack);
 			double num1 = pop (stack);
 			push (stack, num1 - num2);
+			state = OUT;
 		}
-		else if (state == OUT && expr[i] == '*') {
-			double num2 = pop (stack);
-			double num1 = pop (stack);
-			push (stack, num1 * num2);
-		}
+		else if (state == OUT && expr[i] == '*')
+			push (stack, pop (stack) * pop (stack));
 		else if (state == OUT && expr[i] == '/') {
 			double num2 = pop (stack);
 			double num1 = pop (stack);
@@ -92,6 +107,14 @@ void polish_calc (const char * expr) {
 		i++;
 	}
 
+	// the corner case when '-' is the last operand in expression
+	if (state == NEG) {
+		double num2 = pop (stack);
+		double num1 = pop (stack);
+		push (stack, num1 - num2);
+		state = OUT;
+	}
+
 	double res = pop (stack);
 	printf ("%s = %.3f\n", expr, res);
 
@@ -101,8 +124,17 @@ void polish_calc (const char * expr) {
 }
 
 void run_tests () {
-	unsigned num_exprs = 4;
-	char * exprs[] = {"1 2 -", "1 2 - 4 5 + *", "62.0 8.0 /", "100 8 %"};
+	unsigned num_exprs = 8;
+	char * exprs[] = {
+		"1 2 -", 
+		"1 2 - 4 5 + *", 
+		"62.0 8.0 /", 
+		"100 8 %", 
+		"10 -4 /", 
+		"11 -3 -",
+		"-11 5 %",
+		"-11 -3 -"
+	};
 
 	for (unsigned i = 0; i < num_exprs; i++)
 		polish_calc (exprs[i]);
