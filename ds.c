@@ -35,6 +35,14 @@ void print_list (LinkedList * list) {
 	}
 }
 
+void print_alternate (LinkedList * list, int first) {
+	if (list != NULL) {
+		if (first)
+			printf ("%d, ", list->val);
+		print_alternate (list->next, (first + 1) % 2);
+	} 
+}
+
 LinkedList * append_node (LinkedList * list, LinkedList * node) {
 	if (list == NULL)
 		return node;
@@ -81,6 +89,24 @@ void test_reverse_arrows () {
 	delete_nodes (list);
 }
 
+
+void test_print_alternate () {
+	int xs[] = {1,2,3,4,5};
+	LinkedList * list = NULL;
+	for (int i = 0; i < SIZE; i++) {
+		LinkedList * node = create_node (xs[i]);
+		if (list == NULL)
+			list = node;
+		else 
+			list = append_node (list, node);
+	}
+	
+	print_list (list); printf ("\n");
+	print_alternate (list, 1); printf ("\n");
+	print_alternate (list, 0); printf ("\n");
+
+	delete_nodes (list);
+}
 
 void find_y_point (LinkedList * list1, LinkedList * list2) {
 	int len1 = 0, len2 = 0;
@@ -154,7 +180,8 @@ void test_y_point () {
 
 void run_tests () {
 	// test_y_point ();
-	test_reverse_arrows ();
+	// test_reverse_arrows ();
+	test_print_alternate ();
 }
 
 int main () {

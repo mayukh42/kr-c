@@ -145,11 +145,11 @@ void power_test (int base, int lower, int upper) {
  */
 void run_tests () {
 	// test_sizeof_parens ();
-	// output_one_word_per_line ();
+	output_one_word_per_line ();
 	// count_digits_whitespace_others ();
 	// histogram_wordlengths ();
 	// histogram_chars ();
-	power_test (3, 2, 20);
+	// power_test (3, 2, 20);
 }
 
 int main () {
