@@ -118,6 +118,17 @@ LinkedList * reverse_arrows (LinkedList * list) {
 	}
 }
 
+void delete_alt (LinkedList * list) {
+	if (list != NULL) {
+		while (list->next != NULL) {
+			LinkedList * node = list->next;
+			list->next = list->next->next;
+			free (node);
+			list = list->next;
+		}
+	}
+}
+
 
 /** LinkedList container, w/ a reference to the last element 
  * for O(1) append () ops
@@ -177,6 +188,25 @@ void delete_cont (LLCont * cont) {
 
 /** All tests
  */
+void test_delete_alt () {
+	LinkedList * list = NULL;
+	for (int i = 0; i < SIZE; i++) {
+		LinkedList * node = create_node (i+1);
+		if (list == NULL)
+			list = node;
+		else 
+			list = append_node (list, node);
+	}
+
+	print_list (list); printf ("\n");
+
+	delete_alt (list);
+	print_list (list); printf ("\n");
+
+	delete_nodes (list);
+
+}
+
 void test_reverse_arrows_cont () {
 	LLCont * cont = (LLCont *) malloc (sizeof (LLCont));
 	cont->head = NULL;
@@ -265,7 +295,8 @@ void run_tests () {
 	// test_y_point ();
 	// test_reverse_arrows ();
 	// test_print_alternate ();
-	test_reverse_arrows_cont ();
+	// test_reverse_arrows_cont ();
+	test_delete_alt ();
 }
 
 int main () {
