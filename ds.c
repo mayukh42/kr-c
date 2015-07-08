@@ -7,8 +7,6 @@
 
 #define SIZE 5
 
-struct LinkedList;
-
 /** Classical LinkedList
  */
 typedef struct LinkedList {
@@ -134,12 +132,12 @@ void delete_alt (LinkedList * list) {
  * for O(1) append () ops
  * Allows O(n) reversal
  */
-typedef struct LLCont {
+typedef struct LLContainer {
 	LinkedList * head;
 	LinkedList * last;
-} LLCont;
+} LLContainer;
 
-LLCont * append_cont (LLCont * cont, LinkedList * node) {
+LLContainer * append_cont (LLContainer * cont, LinkedList * node) {
 	if (cont == NULL)
 		return cont;
 
@@ -155,13 +153,13 @@ LLCont * append_cont (LLCont * cont, LinkedList * node) {
 	return cont;
 }
 
-void print_LLCont (LLCont * cont) {
+void print_LLContainer (LLContainer * cont) {
 	printf ("[ ");
 	print_list (cont->head);
 	printf (" ]\n");
 }
 
-LLCont * reverse_arrows_cont (LLCont * cont) {
+LLContainer * reverse_arrows_cont (LLContainer * cont) {
 	if (cont == NULL)
 		return cont;
 
@@ -178,7 +176,7 @@ LLCont * reverse_arrows_cont (LLCont * cont) {
 	}
 }
 
-void delete_cont (LLCont * cont) {
+void delete_cont (LLContainer * cont) {
 	if (cont != NULL) {
 		delete_nodes (cont->head);
 		free (cont);
@@ -208,7 +206,7 @@ void test_delete_alt () {
 }
 
 void test_reverse_arrows_cont () {
-	LLCont * cont = (LLCont *) malloc (sizeof (LLCont));
+	LLContainer * cont = (LLContainer *) malloc (sizeof (LLContainer));
 	cont->head = NULL;
 	cont->last = NULL;
 	int xs[] = {1,2,3,4,5};
@@ -217,10 +215,10 @@ void test_reverse_arrows_cont () {
 		cont = append_cont (cont, node);
 	}
 
-	print_LLCont (cont);
+	print_LLContainer (cont);
 
 	cont = reverse_arrows_cont (cont);
-	print_LLCont (cont);
+	print_LLContainer (cont);
 
 	delete_cont (cont);
 }
