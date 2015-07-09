@@ -4,9 +4,8 @@
 /** author: mayukh
  * github.com/mayukh42
 
- * Linked List Problems 
- * Taken from Document #105, Stanford CS Education Library
- * http://cslibrary.stanford.edu/
+ * Linked List Problems, Stanford CS Education Library
+ * http://cslibrary.stanford.edu/105
  */
 
 typedef struct Node {
@@ -57,13 +56,14 @@ void append (Node ** node, int v) {
 		return;
 	}
 
+	v_node->next = (* node)->next;
 	(* node)->next = v_node;
 }
 
-Node * create_basic_list (int n) {
+Node * create_basic_list (int * xs, int n) {
 	Node * list = NULL;
-	for (int i = n; i >= 1; i--) 
-		push (&list, i);
+	for (int i = n-1; i >= 0; i--) 
+		push (&list, xs[i]);
 	return list;
 }
 
@@ -95,10 +95,10 @@ Node * create_basic_list_3 (int n) {
 
 	for (int i = 1; i <= n; i++) {
 		if (list == NULL) {
-			push (&list, i);
+			push (&list, i*2);
 			last = list;
 		} else {
-			push (&(last->next), i);
+			push (&(last->next), i*2);
 			last = last->next;
 		}
 	}
@@ -118,6 +118,8 @@ void print_list (Node * list) {
 	printf ("]\n");
 }
 
+/** 4 - delete list 
+ */
 void delete_list (Node * node) {
 	if (node != NULL) {
 		delete_list (node->next);
@@ -166,7 +168,8 @@ int nth (Node * list, int n) {
 }
 
 void test_nth () {
-	Node * list = create_basic_list (5);
+	int xs[] = {1,2,3,4,5};
+	Node * list = create_basic_list (xs, 5);
 	int idx0 = 3, idx1 = 6;
 
 	printf ("%dth element (index: %d) = %d\n", idx0 + 1, idx0, nth (list, idx0));
@@ -196,13 +199,252 @@ void test_pop () {
 	}
 }
 
+/** 5 - insert nth - inserts at nth index 
+ */
+void insert_at (Node ** list, int n, int val) {
+	int len = length (* list);
+	if (n < 0 || n > len)
+		return;
+
+	Node ** it = list;
+	while (n > 0) {
+		it =  &((* it)->next);
+		n--;
+	}
+	push (it, val);
+}
+
+void test_insert_at () {
+	Node * list = create_basic_list_3 (5);
+	print_list (list);
+
+	insert_at (&list, 3, 8);
+	print_list (list);
+
+	insert_at (&list, 0, 10);
+	print_list (list);
+
+	Node * empty = NULL;
+	insert_at (&empty, 0, 11);
+	print_list (empty);
+
+	delete_list (list);
+	delete_list (empty);
+}
+
+void push_node (Node ** node, Node * v_node) {
+	if (* node == NULL) {
+		* node = v_node;
+		return;
+	}
+
+	v_node->next = * node;
+	* node = v_node;
+}
+
+/** 6 - sorted insert - insert at the right position
+ * in a sorted list
+ */
+void sorted_insert (Node ** list, Node * v_node) {
+	Node ** it = list;
+	while (* it != NULL && v_node->val > (* it)->val)
+		it = &((* it)->next);
+
+	push_node (it, v_node);
+}
+
+void test_sorted_insert () {
+	Node * list = create_basic_list_3 (5);
+	print_list (list);
+
+	sorted_insert (&list, create_node (3));
+	sorted_insert (&list, create_node (1));
+	sorted_insert (&list, create_node (20));
+	print_list (list);
+
+	Node * empty = NULL;
+	sorted_insert (&empty, create_node (6));
+	print_list (empty);
+
+	delete_list (list);
+	delete_list (empty);
+}
+
+/** 7 - insertion sort 
+ * O(n^2)
+ */
+void isort_list (Node ** list) {
+	if (* list == NULL)
+		return;
+
+	Node * it = * list;
+	* list = NULL;
+	while (it != NULL) {
+		Node * it2 = it->next;
+		it->next = NULL;
+		sorted_insert (list, it);
+		it = it2;
+	}
+}
+
+void test_isort () {
+	Node * list = NULL;
+	append (&list, 8);
+	append (&list, 0);
+	append (&list, 2);
+	append (&list, 7);
+	append (&list, 0);
+	append (&list, 1);
+
+	print_list (list);
+
+	isort_list (&list);
+	print_list (list);
+}
+
+void append_list (Node ** node, Node * v_node) {
+	if (* node == NULL) {
+		* node = v_node;
+		return;
+	}
+
+	(* node)->next = v_node;
+}
+
+/** 8 - append (concat) lists
+ * ++
+ */
+void concat (Node ** first, Node ** second) {
+	if (* first == NULL) {
+		* first = * second;
+		return;
+	}
+	
+	Node ** it = first;
+	while (* it != NULL) 
+		it = &((* it)->next);
+	append_list (it, * second);
+	* second = NULL;
+}
+
+void test_concat () {
+	Node * first = create_basic_list_2 (4);
+	Node * second = create_basic_list_3 (5);
+	concat (&first, &second);
+	print_list (first);
+
+	delete_list (first);
+
+	Node * third = NULL;
+	Node * fourth = NULL;
+	Node * fifth = create_basic_list_3 (3);
+	concat (&third, &fourth);
+	print_list (third);
+
+	concat (&fifth, &fourth);
+	print_list (fifth);
+}
+
+/** 9 - split into 2 halves
+ * longer half goes in the first
+ */
+void split (Node ** list, Node ** second) {
+	int n = length (* list);
+	if (n == 0)
+		return;
+
+	n = n - n/2;
+	Node ** it = list;
+	while (n > 1) {
+		it = &((* it)->next);
+		n--;
+	}
+	* second = (* it)->next;
+	(* it)->next = NULL;
+}
+
+void test_split () {
+	Node * list = create_basic_list_3 (3);
+
+	Node * second = NULL;
+	split (&list, &second);
+
+	print_list (list);
+	print_list (second);
+}
+
+void remove_next (Node ** node) {
+	if (* node == NULL)
+		return;
+	else if ((* node)->next == NULL)
+		return;
+
+	Node * next = (* node)->next;
+	(* node)->next = next->next;
+	free (next);
+}
+
+/** 10 - remove duplicates
+ * assume sorted list
+ */
+void distinct (Node ** list) {
+	if (* list == NULL)
+		return;
+
+	Node ** it = list;
+	while (* it != NULL) {
+		Node * next = (* it)->next;
+		if (next != NULL && next->val == (* it)->val) {
+			remove_next (it);
+			continue;
+		} else {
+			it = &((* it)->next);
+		}
+	}
+}
+
+void test_distinct () {
+	int xs[] = {1,1,2,3,3,3,4,4,5};
+	Node * list = create_basic_list (xs, 9);
+	print_list (list);
+	// remove_next (&list);
+	distinct (&list);
+	print_list (list);
+}
+
+/** 11 - move_node: move 1st node of 2nd list to head of 1st list
+ */
+void move_node (Node ** first, Node ** second) {
+	if (* second == NULL)
+		return;
+
+	Node * s0 = * second;
+	* second = (* second)->next;
+	push_node (first, s0);
+}
+
+void test_move_node () {
+	Node * list = create_basic_list_3 (5);
+	Node * list2 = create_basic_list_2 (5);
+
+	move_node (&list, &list2);
+	print_list (list);
+	print_list (list2);
+}
 
 void run_tests () {
 	// test_utilities ();
 
 	// test_count_value ();
 	// test_nth ();
-	test_pop ();
+	// test_pop ();
+	// test_insert_at ();
+	// test_sorted_insert ();
+	// test_isort ();
+	// test_concat ();
+	// test_split ();
+	// test_distinct ();
+	test_move_node ();
 }
 
 int main () {
