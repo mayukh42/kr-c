@@ -412,7 +412,8 @@ void test_distinct () {
 	print_list (list);
 }
 
-/** 11 - move_node: move 1st node of 2nd list to head of 1st list
+/** 11 - move_node ()
+ * move 1st node of 2nd list to head of 1st list
  */
 void move_node (Node ** first, Node ** second) {
 	if (* second == NULL)
@@ -420,6 +421,7 @@ void move_node (Node ** first, Node ** second) {
 
 	Node * s0 = * second;
 	* second = (* second)->next;
+	s0->next = NULL;
 	push_node (first, s0);
 }
 
@@ -432,6 +434,248 @@ void test_move_node () {
 	print_list (list2);
 }
 
+/** 12 - alter_split ()
+ * splits a list into 2, putting alternate elements in each
+ */
+void alter_split (Node ** list, Node ** first, Node ** second) {
+	while (* list != NULL) {
+		move_node (first, list);
+		move_node (second, list);
+	}
+}
+
+void test_alter_split () {
+	Node * list = create_basic_list_2 (9);
+	print_list (list);	
+	Node * first = NULL;
+	Node * second = NULL;
+
+	alter_split (&list, &first, &second);
+	print_list (first);
+	print_list (second);
+}
+
+/** 13 - shuffle_merge ()
+ * merges alternate nodes of 2 lists one after the other
+ * inverse of alter_split: shuffle_merge (alter_split (xs)) == xs
+ */
+void shuffle_merge (Node ** first, Node ** second, Node ** list) {
+	while (* first != NULL && * second != NULL) {
+		move_node (list, first);
+		move_node (list, second);
+	}
+	while (* first != NULL)
+		move_node (list, first);
+	while (* second != NULL)
+		move_node (list, second);
+}
+
+void test_shuffle_merge () {
+	Node * list = create_basic_list_2 (9);
+	print_list (list);	
+	Node * first = NULL;
+	Node * second = NULL;
+
+	alter_split (&list, &first, &second);
+	print_list (first);
+	print_list (second);
+
+	shuffle_merge (&first, &second, &list);
+	print_list (list);	// should be same as original list
+}
+
+/** move_node_last ()
+ * move 1st node of 2nd list to end of 1st list
+ */
+void move_node_last (Node ** list, Node ** second) {
+	if (* second == NULL)
+		return;
+
+	Node * node = * second;
+	* second = (* second)->next;
+	node->next = NULL;
+
+	Node * last = find_last (* list);
+	if (last == NULL)	// change find_last to return addr, to avoid this hack
+		append_list (list, node);
+	else
+		append_list (&last, node);
+}
+
+void test_move_node_last () {
+	Node * list = NULL;
+	Node * second = create_basic_list_3 (3);
+	move_node_last (&list, &second);
+
+	print_list (list);
+	print_list (second);
+}
+
+/** 14 - sorted_merge ()
+ * merge 2 sorted lists
+ */
+void sorted_merge (Node ** first, Node ** second, Node ** list) {
+	while (* first != NULL && * second != NULL) {
+		if ((* first)->val < (* second)->val)
+			move_node_last (list, first);
+		else
+			move_node_last (list, second);
+	}
+	while (* first != NULL)
+		move_node_last (list, first);
+	while (* second != NULL)
+		move_node_last (list, second);
+}
+
+void test_sorted_merge () {
+	Node * first = create_basic_list_3 (3);
+	Node * second = create_basic_list_2 (5);
+	Node * list = NULL;
+
+	print_list (first);
+	print_list (second);
+	sorted_merge (&first, &second, &list);
+	print_list (list);
+}
+
+/** 15 - mergesort ()
+ * classical merge sort algorithm
+ */
+void mergesort (Node ** list) {
+	if (length (* list) <= 1)
+		return;
+	else {
+		Node * second = NULL;
+		Node * first = * list;
+		split (&first, &second);
+
+		mergesort (&first);
+		mergesort (&second);
+
+		* list = NULL;
+		sorted_merge (&first, &second, list);
+	}
+}
+
+void test_mergesort () {
+	int xs[] = {8,0,2,7,0,1};
+	Node * list = create_basic_list (xs, 6);
+
+	mergesort (&list);
+	print_list (list);
+}
+
+/** 16 - sorted_intersect () 
+ * returns set intersection of 2 sorted lists
+ */
+void sorted_intersect (Node ** first, Node ** second, Node ** list) {
+	int last_val = -1;
+	while (* first != NULL && * second != NULL) {
+
+		if ((* first)->val == (* second)->val 
+			&& (* first)->val != last_val) {
+
+			last_val = (* first)->val;
+			push (list, last_val);
+			* first = (* first)->next;
+			* second = (* second)->next;
+		} 
+		else if ((* first)->val < (* second)->val)
+			* first = (* first)->next;
+		else
+			* second = (* second)->next;
+	}
+} 
+
+void test_sorted_intersect () {	
+	int xs[] = {1,2,2,3};
+	int ys[] = {2,2,3,4,5};
+	Node * first = create_basic_list (xs, 4);
+	Node * second = create_basic_list (ys, 5);
+	Node * list = NULL;
+
+	print_list (first);
+	print_list (second);
+
+	sorted_intersect (&first, &second, &list);
+	print_list (list);
+}
+
+/** 17 - reverse_iter ()
+ * iterative solution of the linked list reverse
+ */
+void reverse_iter (Node ** list) {
+	Node * res = NULL;
+	while (* list != NULL) 
+		move_node (&res, list);
+	* list = res;
+}
+
+void test_reverse_iter () {
+	Node * list = create_basic_list_2 (5);
+	print_list (list);
+
+	reverse_iter (&list);
+	print_list (list);
+
+	delete_list (list);
+}
+
+/** 18 - reverse_rec ()
+ * recursive solution of the linked list reverse
+ * functional programming approach
+ */
+void reverse_rec (Node ** list) {
+	if (* list == NULL)
+		return;
+	if ((* list)->next == NULL)
+		return;
+	else {
+		Node * node = * list;
+		* list = (* list)->next;
+		reverse_rec (list);
+		move_node_last (list, &node);
+	}
+}
+
+void test_reverse_rec () {
+	Node * list = create_basic_list_2 (7);
+	print_list (list);
+
+	reverse_rec (&list);
+	print_list (list);
+
+	delete_list (list);
+}
+
+/** reverse ()
+ */
+void reverse (Node ** list) {
+	if ((* list) != NULL && (* list)->next != NULL 
+		&& (* list)->next->next != NULL) {
+		reverse (&(* list)->next);
+	}
+	// Node * prev = * list;
+	// Node * last = (* list)->next;
+	// printf ("%d, %d\n", prev->val, last->val);
+	// print_list (last);
+	// print_list (prev);
+	// prev->next = last->next;
+	// last->next = prev;
+	// * list = last;	
+}
+
+void test_reverse () {
+	Node * list = create_basic_list_2 (5);
+	print_list (list);
+
+	reverse (&list);
+	print_list (list);
+
+	// delete_list (list);
+}
+
+// all tests
 void run_tests () {
 	// test_utilities ();
 
@@ -444,7 +688,16 @@ void run_tests () {
 	// test_concat ();
 	// test_split ();
 	// test_distinct ();
-	test_move_node ();
+	// test_move_node ();
+	// test_alter_split ();
+	// test_shuffle_merge ();
+	// test_move_node_last ();
+	// test_sorted_merge ();
+	// test_mergesort ();
+	// test_sorted_intersect ();
+	// test_reverse_iter ();
+	// test_reverse_rec ();
+	test_reverse ();
 }
 
 int main () {
