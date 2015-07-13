@@ -130,7 +130,7 @@ void print_list (Node * list) {
 	printf ("]\n");
 }
 
-/** 4 - delete list 
+/** 3 - delete list 
  */
 void delete_list (Node * node) {
 	if (node != NULL) {
@@ -189,7 +189,7 @@ void test_nth () {
 	printf ("%dth element (index: %d) = %d\n", idx1 + 1, idx1, nth (list, idx1));
 }
 
-/** 3 - pop the head: beheads and returns value
+/** 4 - pop the head: beheads and returns value
  * mutates original list
  */
 int pop (Node ** node) {
