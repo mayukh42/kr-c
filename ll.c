@@ -634,10 +634,6 @@ void reverse_iter (Node ** list) {
 	* list = res;
 }
 
-void test_reverse_iter () {
-	testfactory_list (reverse_iter);
-}
-
 /** 18 - reverse_rec ()
  * recursive solution of the linked list reverse
  * functional programming approach
@@ -656,10 +652,6 @@ void reverse_rec (Node ** list) {
 	}
 }
 
-void test_reverse_rec () {
-	testfactory_list (reverse_rec);
-}
-
 /** rev_rec ()
  * helper function for reverse (), a recursive version of reverse_iter ()
  */
@@ -673,7 +665,7 @@ void rev_rec (Node ** list, Node ** acc) {
 void test_rev_rec () {
 	Node * list = create_basic_list_2 (5);
 	Node * acc = NULL;
-	print_list (list);
+	print_list (list); 
 	print_list (acc);
 
 	rev_rec (&list, &acc);
@@ -712,6 +704,8 @@ int is_equal (Node ** first, Node ** second) {
 }
 
 void test_reverse () {
+	testfactory_list (reverse_iter);
+	testfactory_list (reverse_rec);
 	testfactory_list (reverse);
 
 	int n = 5;
@@ -750,8 +744,6 @@ void run_tests () {
 	// test_sorted_merge ();
 	// test_mergesort ();
 	// test_sorted_intersect ();
-	// test_reverse_iter ();
-	// test_reverse_rec ();
 	// test_rev_rec ();
 	test_reverse ();
 }
