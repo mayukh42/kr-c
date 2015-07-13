@@ -60,6 +60,16 @@ void append (Node ** node, int v) {
 	(* node)->next = v_node;
 }
 
+void append_node (Node ** node, Node * v_node) {
+	if (* node == NULL) {
+		* node = v_node;
+		return;
+	}
+
+	v_node->next = (* node)->next;
+	(* node)->next = v_node;
+}
+
 Node * create_basic_list (int * xs, int n) {
 	Node * list = NULL;
 	for (int i = n-1; i >= 0; i--) 
@@ -412,7 +422,7 @@ void test_distinct () {
 	print_list (list);
 }
 
-/** 11 - move_node: move 1st node of 2nd list to head of 1st list
+/** 11 - move_node: move head of 2nd list to head of 1st list
  */
 void move_node (Node ** first, Node ** second) {
 	if (* second == NULL)
@@ -420,6 +430,7 @@ void move_node (Node ** first, Node ** second) {
 
 	Node * s0 = * second;
 	* second = (* second)->next;
+	s0->next = NULL;
 	push_node (first, s0);
 }
 
@@ -431,6 +442,74 @@ void test_move_node () {
 	print_list (list);
 	print_list (list2);
 }
+
+/** 12 - alter_split ()
+ * split every alternate element into the same list
+ * return 2 lists
+ */
+void alter_split (Node ** list, Node ** first, Node ** second) {
+	if (* list == NULL)
+		return;
+
+	int select = 1;
+	Node ** it = list;
+	while (* it != NULL) {
+		if (select)
+			move_node (first, it);
+		else
+			move_node (second, it);		
+		select = (select + 1) % 2;
+	}
+}
+
+void test_alter_split () {
+	Node * list = create_basic_list_2 (9);
+	print_list (list);
+
+	Node * first = NULL;
+	Node * second = NULL;
+
+	alter_split (&list, &first, &second);
+	print_list (first);
+	print_list (second);
+}
+
+void move_node_last (Node ** first, Node ** second) {
+	
+}
+
+/** shuffle_merge ()
+ * merges 2 lists, each element taken alternately until either list runs out
+ * at which point, the remaining elements of the other list are copied as is
+ */
+void shuffle_merge (Node ** first, Node ** second, Node ** list) {
+	while (* first != NULL && * second != NULL) {
+		move_node (list, first);
+		move_node (list, second);
+	} 
+	while (* first != NULL)
+		move_node (list, first);
+	while (* second != NULL)
+		move_node (list, second);
+}
+
+void test_shuffle_merge () {
+	int xs[] = {1,3,5,7,9};
+	Node * first = create_basic_list (xs, 5);
+	Node * second = create_basic_list_3 (3);
+	Node * list = NULL;
+
+	print_list (first);
+	print_list (second);
+
+	shuffle_merge (&first, &second, &list);
+	print_list (list);
+}
+
+/** sorted_merge ()
+ * merge 2 lists in order
+ */
+
 
 void run_tests () {
 	// test_utilities ();
@@ -444,7 +523,9 @@ void run_tests () {
 	// test_concat ();
 	// test_split ();
 	// test_distinct ();
-	test_move_node ();
+	// test_move_node ();
+	// test_alter_split ();
+	test_shuffle_merge ();
 }
 
 int main () {
