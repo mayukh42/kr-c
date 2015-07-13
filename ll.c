@@ -16,6 +16,8 @@ typedef struct Node {
 /**
  * Utility functions
  */
+typedef void (* listfn) (Node ** list);
+
 int length (Node * list) {
 	if (list == NULL)
 		return 0;
@@ -159,8 +161,9 @@ int count_value (Node * list, int value) {
 }
 
 void test_count_value () {	
-	Node * list = create_basic_list_2 (5);
-	int value = 2;
+	int xs[] = {1,2,2,3,3,3,4};
+	Node * list = create_basic_list (xs, 7);
+	int value = 3;
 	int freq = count_value (list, value);
 	printf ("%d occurs %d times in the list\n", value, freq);
 }
@@ -298,14 +301,8 @@ void isort_list (Node ** list) {
 }
 
 void test_isort () {
-	Node * list = NULL;
-	append (&list, 8);
-	append (&list, 0);
-	append (&list, 2);
-	append (&list, 7);
-	append (&list, 0);
-	append (&list, 1);
-
+	int xs[] = {8,0,2,7,0,1};
+	Node * list = create_basic_list (xs, 6);
 	print_list (list);
 
 	isort_list (&list);
@@ -413,7 +410,7 @@ void distinct (Node ** list) {
 }
 
 void test_distinct () {
-	int xs[] = {1,1,2,3,3,3,4,4,5};
+	int xs[] = {1,1,2,3,3,3,4,5,5};
 	Node * list = create_basic_list (xs, 9);
 	print_list (list);
 	// remove_next (&list);
@@ -514,7 +511,7 @@ void move_node_last (Node ** list, Node ** second) {
 }
 
 void test_move_node_last () {
-	Node * list = NULL;
+	Node * list = create_basic_list_2 (4);
 	Node * second = create_basic_list_3 (3);
 	move_node_last (&list, &second);
 
@@ -546,7 +543,7 @@ void test_sorted_merge () {
 	print_list (first);
 	print_list (second);
 
-	shuffle_merge (&first, &second, &list);
+	sorted_merge (&first, &second, &list);
 	print_list (list);
 }
 
@@ -613,6 +610,20 @@ void test_sorted_intersect () {
 	print_list (list);
 }
 
+/** testfactory_list ()
+ * a factory of test functions for reverse 
+ */
+void testfactory_list (listfn fn) {
+	int xs[] = {1,2,3,4,5};
+	Node * list = create_basic_list (xs, 5);
+	print_list (list);
+
+	fn (&list);
+	print_list (list);
+
+	delete_list (list);
+}
+
 /** 17 - reverse_iter ()
  * iterative solution of the linked list reverse
  */
@@ -624,18 +635,13 @@ void reverse_iter (Node ** list) {
 }
 
 void test_reverse_iter () {
-	Node * list = create_basic_list_2 (5);
-	print_list (list);
-
-	reverse_iter (&list);
-	print_list (list);
-
-	delete_list (list);
+	testfactory_list (reverse_iter);
 }
 
 /** 18 - reverse_rec ()
  * recursive solution of the linked list reverse
  * functional programming approach
+ * O(n^2) for naive linked list
  */
 void reverse_rec (Node ** list) {
 	if (* list == NULL)
@@ -651,40 +657,77 @@ void reverse_rec (Node ** list) {
 }
 
 void test_reverse_rec () {
-	Node * list = create_basic_list_2 (7);
-	print_list (list);
+	testfactory_list (reverse_rec);
+}
 
-	reverse_rec (&list);
-	print_list (list);
+/** rev_rec ()
+ * helper function for reverse (), a recursive version of reverse_iter ()
+ */
+void rev_rec (Node ** list, Node ** acc) {
+	if (* list != NULL) {
+		move_node (acc, list);
+		rev_rec (list, acc);
+	}
+}
 
-	delete_list (list);
+void test_rev_rec () {
+	Node * list = create_basic_list_2 (5);
+	Node * acc = NULL;
+	print_list (list);
+	print_list (acc);
+
+	rev_rec (&list, &acc);
+	print_list (list);
+	print_list (acc);
 }
 
 /** reverse ()
+ * recursive version of reverse_iter ()
+ * O(n)
  */
 void reverse (Node ** list) {
-	if ((* list) != NULL && (* list)->next != NULL 
-		&& (* list)->next->next != NULL) {
-		reverse (&(* list)->next);
+	Node * acc = NULL;
+	rev_rec (list, &acc);
+	* list = acc;
+}
+
+/** is_equal ()
+ * returns 1 if 2 lists have same values, else returns 0
+ */
+int is_equal (Node ** first, Node ** second) {
+	int res = 1;
+	Node * l1 = * first;
+	Node * l2 = * second;
+	while (l1 != NULL && l2 != NULL) {
+		if (l1->val != l2->val) {
+			res = 0;
+			return res;
+		}
+		l1 = l1->next;
+		l2 = l2->next;
 	}
-	// Node * prev = * list;
-	// Node * last = (* list)->next;
-	// printf ("%d, %d\n", prev->val, last->val);
-	// print_list (last);
-	// print_list (prev);
-	// prev->next = last->next;
-	// last->next = prev;
-	// * list = last;	
+	if (l1 != NULL || l2 != NULL)
+		res = 0;
+	return res;  
 }
 
 void test_reverse () {
-	Node * list = create_basic_list_2 (5);
-	print_list (list);
+	testfactory_list (reverse);
+
+	int n = 5;
+	Node * list = create_basic_list_2 (n);
+	Node * gold = create_basic_list_2 (n);
 
 	reverse (&list);
-	print_list (list);
+	reverse (&list);
 
-	// delete_list (list);
+	int same = is_equal (&gold, &list);
+	if (same)
+		printf ("reverse . reverse test passed\n");
+	else 
+		printf ("reverse . reverse test failed\n");
+
+	delete_list (list);
 }
 
 // all tests
@@ -708,8 +751,9 @@ void run_tests () {
 	// test_mergesort ();
 	// test_sorted_intersect ();
 	// test_reverse_iter ();
-	test_reverse_rec ();
-	// test_reverse ();
+	// test_reverse_rec ();
+	// test_rev_rec ();
+	test_reverse ();
 }
 
 int main () {
