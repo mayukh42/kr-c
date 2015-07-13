@@ -32,12 +32,6 @@ Node * create_node (int v) {
 	return node;
 }
 
-Node * add (Node * list, int v) {
-	Node * node = create_node (v);
-	node->next = list;
-	return node;
-}
-
 void push (Node ** node, int v) {
 	Node * v_node = create_node (v);
 
@@ -634,7 +628,7 @@ void reverse_iter (Node ** list) {
 	* list = res;
 }
 
-/** 18 - reverse_rec ()
+/** reverse_rec ()
  * recursive solution of the linked list reverse
  * functional programming approach
  * O(n^2) for naive linked list
@@ -673,7 +667,7 @@ void test_rev_rec () {
 	print_list (acc);
 }
 
-/** reverse ()
+/** 18 - reverse ()
  * recursive version of reverse_iter ()
  * O(n)
  */
@@ -722,6 +716,7 @@ void test_reverse () {
 		printf ("reverse . reverse test failed\n");
 
 	delete_list (list);
+	delete_list (gold);
 }
 
 // all tests
