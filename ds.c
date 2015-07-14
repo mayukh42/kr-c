@@ -3,6 +3,8 @@
 
 /** author: mayukh
  * github.com/mayukh42
+
+ * DataStructures - Some problems
  */
 
 #define SIZE 5
@@ -43,6 +45,45 @@ void print_alternate (LinkedList * list, int first) {
 	} 
 }
 
+/** append_node ()
+ * find last, then append to it
+ * return list head
+ */
+LinkedList * append_node (LinkedList * list, LinkedList * node) {
+	if (list == NULL)
+		return node;
+	if (node == NULL)
+		return list;
+
+	LinkedList * it = list;
+	while (it->next != NULL) {
+		it = it->next;
+	}
+	it->next = node;
+	return list;
+}
+
+void test_print_alternate () {
+	int xs[] = {1,2,3,4,5};
+	LinkedList * list = NULL;
+	for (int i = 0; i < SIZE; i++) {
+		LinkedList * node = create_node (xs[i]);
+		if (list == NULL)
+			list = node;
+		else 
+			list = append_node (list, node);
+	}
+	
+	print_list (list); printf ("\n");
+	print_alternate (list, 1); printf ("\n");
+	print_alternate (list, 0); printf ("\n");
+
+	delete_nodes (list);
+}
+
+/** find_y_point ()
+ * find jn at which 2 finite lists meet
+ */
 void find_y_point (LinkedList * list1, LinkedList * list2) {
 	int len1 = 0, len2 = 0;
 	LinkedList * first = list1;
@@ -84,18 +125,84 @@ void find_y_point (LinkedList * list1, LinkedList * list2) {
 	printf ("Lists are separate\n");
 }
 
-LinkedList * append_node (LinkedList * list, LinkedList * node) {
-	if (list == NULL)
-		return node;
-	if (node == NULL)
-		return list;
+void test_y_point () {
+	int xs[] = {1,2,3,4,5,6};
+	LinkedList * list = NULL;
+	LinkedList * last = NULL;
+	LinkedList * jn = NULL;
+	int jn_val = 4;
+	for (int i = 0; i < 6; i++) {
+		LinkedList * node = create_node (xs[i]);
+		if (xs[i] == jn_val)
+			jn = node;
 
-	LinkedList * it = list;
-	while (it->next != NULL) {
-		it = it->next;
+		if (list == NULL) {
+			list = node;
+			last = list;
+		} else {
+			last->next = node;
+			last = node;
+		}
 	}
-	it->next = node;
-	return list;
+
+	LinkedList * list2 = create_node (7);
+	LinkedList * node1 = create_node (8);
+	LinkedList * node2 = create_node (9);
+	node2->next = jn;
+	node1->next = node2;
+	list2->next = node1;
+
+	print_list (list); printf ("\n");
+	print_list (list2); printf ("\n");
+
+	find_y_point (list, list2);
+}
+
+/** find_jn_cycle ()
+ * find the jn point in a list shaped like a '6'
+ * assume input list has cycle; else may get SIGSEGV
+ */
+void find_jn_cycle (LinkedList * list) {
+	if (list == NULL) 
+		return;
+
+	LinkedList * first = list;
+	LinkedList * second = list->next;
+	while (first->val != second->val) {
+		first = first->next;
+		second = second->next->next;
+	}
+
+	second = second->next;
+	first->next = NULL;
+	first = list;
+
+	find_y_point (first, second);
+}
+
+void test_jn_cycle () {
+	int xs[] = {1,2,3,4,5,6,7,8,9};
+	int jn_val = 4;
+	LinkedList * list = NULL;
+	LinkedList * last = NULL;
+	LinkedList * jn = NULL;
+	for (int i = 0; i < 9; i++) {
+		LinkedList * node = create_node (xs[i]);
+		if (xs[i] == jn_val)
+			jn = node;
+
+		if (list == NULL) {
+			list = node;
+			last = list;
+		} else {
+			last->next = node;
+			last = node;
+		}
+	}
+
+	last->next = jn;						// cycle introduced
+	// print_list (list); printf ("\n");	// don't print! testing only
+	find_jn_cycle (list);
 }
 
 /**
@@ -116,6 +223,25 @@ LinkedList * reverse_arrows (LinkedList * list) {
 	}
 }
 
+void test_reverse_arrows () {
+	int xs[] = {1,2,3,4,5};
+	LinkedList * list = NULL;
+	for (int i = 0; i < SIZE; i++) {
+		LinkedList * node = create_node (xs[i]);
+		if (list == NULL)
+			list = node;
+		else 
+			list = append_node (list, node);
+	}
+
+	print_list (list); printf ("\n");
+
+	list = reverse_arrows (list);
+	print_list (list); printf ("\n");
+
+	delete_nodes (list);
+}
+
 void delete_alt (LinkedList * list) {
 	if (list != NULL) {
 		while (list->next != NULL) {
@@ -125,6 +251,24 @@ void delete_alt (LinkedList * list) {
 			list = list->next;
 		}
 	}
+}
+
+void test_delete_alt () {
+	LinkedList * list = NULL;
+	for (int i = 0; i < SIZE; i++) {
+		LinkedList * node = create_node (i+1);
+		if (list == NULL)
+			list = node;
+		else 
+			list = append_node (list, node);
+	}
+
+	print_list (list); printf ("\n");
+
+	delete_alt (list);
+	print_list (list); printf ("\n");
+
+	delete_nodes (list);
 }
 
 
@@ -183,28 +327,6 @@ void delete_cont (LLContainer * cont) {
 	}
 }
 
-
-/** All tests
- */
-void test_delete_alt () {
-	LinkedList * list = NULL;
-	for (int i = 0; i < SIZE; i++) {
-		LinkedList * node = create_node (i+1);
-		if (list == NULL)
-			list = node;
-		else 
-			list = append_node (list, node);
-	}
-
-	print_list (list); printf ("\n");
-
-	delete_alt (list);
-	print_list (list); printf ("\n");
-
-	delete_nodes (list);
-
-}
-
 void test_reverse_arrows_cont () {
 	LLContainer * cont = (LLContainer *) malloc (sizeof (LLContainer));
 	cont->head = NULL;
@@ -223,78 +345,16 @@ void test_reverse_arrows_cont () {
 	delete_cont (cont);
 }
 
-void test_reverse_arrows () {
-	int xs[] = {1,2,3,4,5};
-	LinkedList * list = NULL;
-	for (int i = 0; i < SIZE; i++) {
-		LinkedList * node = create_node (xs[i]);
-		if (list == NULL)
-			list = node;
-		else 
-			list = append_node (list, node);
-	}
 
-	print_list (list); printf ("\n");
-
-	list = reverse_arrows (list);
-	print_list (list); printf ("\n");
-
-	delete_nodes (list);
-}
-
-void test_print_alternate () {
-	int xs[] = {1,2,3,4,5};
-	LinkedList * list = NULL;
-	for (int i = 0; i < SIZE; i++) {
-		LinkedList * node = create_node (xs[i]);
-		if (list == NULL)
-			list = node;
-		else 
-			list = append_node (list, node);
-	}
-	
-	print_list (list); printf ("\n");
-	print_alternate (list, 1); printf ("\n");
-	print_alternate (list, 0); printf ("\n");
-
-	delete_nodes (list);
-}
-
-void test_y_point () {
-	int xs[] = {1,2,3,4,5};
-	LinkedList * list = NULL;
-	LinkedList * last = NULL;
-	for (int i = 0; i < SIZE; i++) {
-		LinkedList * node = create_node (xs[i]);
-		if (list == NULL) {
-			list = node;
-			last = list;
-		}
-		else {
-			last->next = node;
-			last = node;
-		}
-	}
-
-	LinkedList * list2 = create_node (-1);
-	LinkedList * node = create_node (0);
-	node->next = list;
-	list2->next = node;
-
-	print_list (list); printf ("\n");
-	print_list (list2); printf ("\n");
-
-	find_y_point (list, list2);
-
-	delete_nodes (list2);
-}
-
+/** All tests
+ */
 void run_tests () {
 	// test_y_point ();
 	// test_reverse_arrows ();
 	// test_print_alternate ();
 	// test_reverse_arrows_cont ();
-	test_delete_alt ();
+	// test_delete_alt ();
+	test_jn_cycle ();
 }
 
 int main () {
