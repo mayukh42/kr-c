@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <limits.h>
 
 /** author: mayukh
  * github.com/mayukh42
@@ -75,6 +76,23 @@ Node * create_basic_tree (Node * root, int m, int n) {
 	return root;
 } 
 
+/** create_tree ()
+ * creates a tree from list of values
+ * list of values are same as in-order traversal of the created tree
+ * if values are not sorted, the tree is not a BST
+ * lo = 0, hi = len (xs): 1 more than last index
+ */
+Node * create_tree (Node * root, int * xs, int lo, int hi) {
+	if (lo >= hi)
+		return root;
+
+	int midx = ((hi - lo) / 2) + lo;
+	root = create_node (xs[midx]);
+	root->left = create_tree (root->left, xs, lo, midx);
+	root->right = create_tree (root->right, xs, midx + 1, hi);
+	return root;
+}
+
 /** prototype for traversal functions
  */
 typedef void (* pf) (Node * root);
@@ -120,6 +138,11 @@ void test_create () {
 	tree = create_basic_tree (tree, 1, 8);
 	print_tree (tree, inorder);
 	print_tree (tree, postorder);
+	delete_tree (tree);
+
+	int xs[] = {8,0,2,7,0,1};
+	tree = create_tree (tree, xs, 0, 6);
+	print_tree (tree, inorder);
 	delete_tree (tree);
 }
 
@@ -180,7 +203,7 @@ Bool is_leaf (Node * root) {
 }
 
 /** 4 - min_val (), max_val ()
- * returns the min value in tree
+ * returns the min, max value in BST
  */
 int min_val (Node * root) {
 	if (is_leaf (root)) 
@@ -327,8 +350,8 @@ void test_double_nodes () {
  */
 Bool is_same (Node * one, Node * two) {
 	if (one != NULL && two != NULL) {
-		Bool atm = one->val == two->val;
-		return (atm && is_same (one->left, two->left) && 
+		Bool current = one->val == two->val;
+		return (current && is_same (one->left, two->left) && 
 			is_same (one->right, two->right));
 	} else if (one == NULL && two == NULL)		// controversial ?
 		return true;
@@ -353,6 +376,132 @@ void test_same () {
 	delete_tree (second);
 }
 
+/** search_bt ()
+ * returns true if the given value exists, false otherwise
+ * Note: tree is NOT a BST
+ */
+Bool search_bt (Node * root, int value) {
+	if (root != NULL) {
+		if (root->val == value)
+			return true;
+
+		Bool has_left = search_bt (root->left, value);
+		if (has_left)
+			return true;
+
+		Bool has_right = search_bt (root->right, value);
+		if (has_right)
+			return true;		
+
+		return false;
+	} else
+		return false;
+}
+
+void test_search_bt () {
+	Node * tree = NULL;
+	tree = create_basic_tree (tree, 1, 100);
+	int value = 79;
+	Bool res = search_bt (tree, value);
+
+	if (res)
+		printf ("%d found\n", value);
+	else
+		printf ("%d not found\n", value);
+
+	delete_tree (tree);
+}
+
+/** 12 - catalan ()
+ * returns the number of possible BST with n nodes that store [1..n]
+ * also called the Catalan Number
+ * each element can be a root; when root = leftmost or rightmost, the left subtree
+ * or right subtree is empty, and this contributes as 1 to the combination of trees
+ */
+int catalan (int n) {
+	if (n <= 1)
+		return 1;
+	
+	int total = 0;
+	for (int i = 1; i <= n; i++) {
+		int nl = i - 1;
+		int nr = n - i;
+		total += catalan (nl) * catalan (nr);
+	}
+	return total;
+}
+
+void test_catalan () {
+	int n = 3;
+	printf ("%d BSTs are possible w/ %d nodes containing [%d..%d]\n", 
+		catalan (n), n, 1, n);
+}
+
+/** 13 - is_bst1 () 
+ * uses min_val & max_val to determine if the tree is a bst
+ */
+Bool is_bst1 (Node * tree) {
+	if (is_leaf (tree)) 
+		return true;
+	else if (tree != NULL) {
+		Bool left = true, right = true;
+		if (tree->left != NULL)
+			left = is_bst1 (tree->left) && max_val (tree->left) < tree->val;
+
+		if (! left)
+			return false;
+
+		if (tree->right != NULL)
+			right = is_bst1 (tree->right) && min_val (tree->right) > tree->val;
+
+		return left && right;
+	} else 
+		return false;
+}
+
+void test_is_bst1 () {
+	int xs[] = {8,0,2,7,0,1};
+	Node * tree = NULL;
+	tree = create_tree (tree, xs, 0, 6);
+	print_tree (tree, inorder);
+
+	Bool ans = is_bst1 (tree);
+	if (ans)
+		printf ("The above tree is a BST\n");
+	else
+		printf ("The above tree is not a BST\n");
+
+	delete_tree (tree);
+}
+
+/** 14 - is_bst2 ()
+ * w/o using min_val, max_val
+ */
+Bool is_bst2 (Node * tree, int mn, int mx) {
+	if (tree != NULL) {
+		Bool current = tree->val >= mn && tree->val <= mx;
+		return (current && 
+			is_bst2 (tree->left, mn, tree->val - 1) &&
+			is_bst2 (tree->right, tree->val + 1, mx));
+	} else 
+		return true;
+}
+
+void test_is_bst2 () {
+	int xs[] = {1,2,3,4,5,6};
+	Node * tree = NULL;
+	tree = create_tree (tree, xs, 0, 6);
+	print_tree (tree, inorder);
+
+	Bool ans = is_bst2 (tree, INT_MIN, INT_MAX);
+	if (ans)
+		printf ("The above tree is a BST\n");
+	else
+		printf ("The above tree is not a BST\n");
+
+	delete_tree (tree);
+}
+
 void run_tests () {
 	// test_create ();
 	// test_size ();
@@ -362,7 +511,11 @@ void run_tests () {
 	// test_print_paths ();
 	// test_mirror ();
 	// test_double_nodes ();
-	test_same ();
+	// test_same ();
+	// test_search_bt ();
+	// test_catalan ();
+	// test_is_bst1 ();
+	test_is_bst2 ();
 }
 
 int main () {
