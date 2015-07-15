@@ -18,3 +18,5 @@ Other programs/ files:
 LinkedList: reverse_arrows, find_y_point, find_jn_cycle
 
 6. text/: Text files for use in exercises
+
+7. tl.c: The Great Tree-List Recursion Problem (http://cslibrary.stanford.edu/109)

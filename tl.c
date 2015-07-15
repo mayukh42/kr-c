@@ -5,10 +5,10 @@
  * github.com/mayukh42
  */
 
-/** Tree List Recursion problem
+/** The Great Tree-List Recursion Problem
  * convert a BST to doubly linked list
  * Stanford CS Education Library
- * http://cslibrary.stanford.edu/110
+ * http://cslibrary.stanford.edu/109
  */
 
 /** Common node for BinaryTree and LinkedList
@@ -34,6 +34,7 @@ Node * create_node (int value) {
 }
 
 /** Ordered Binary Tree
+ * Utility functions
  */
 Node * create_tree (Node * root, int * xs, int lo, int hi) {
 	if (lo >= hi)
@@ -79,13 +80,6 @@ void test_create_tree () {
 	delete_tree (tree);
 }
 
-int size (Node * root) {
-	if (root != NULL) 
-		return 1 + size (root->left) + size (root->right);
-	else
-		return 0;
-}
-
 Bool is_leaf (Node * root) {
 	if (root != NULL && root->left == NULL && root->right == NULL)
 		return true;
@@ -93,25 +87,11 @@ Bool is_leaf (Node * root) {
 		return false;
 }
 
-int min_val (Node * root) {
-	if (is_leaf (root)) 
-		return root->val;
-	else if (root != NULL)
-		return min_val (root->left);
-	else
-		return -1;	
-}
-
-int max_val (Node * root) {
-	if (is_leaf (root)) 
-		return root->val;
-	else if (root != NULL)
-		return max_val (root->right);
-	else
-		return -1;	
-}
-
 /** Circular Linked List
+ * Utility functions
+ */
+
+/** insert_node ()
  * returns the last node added
  */
 Node * insert_node (Node ** head, Node * first, Node * second) {
@@ -133,23 +113,23 @@ Node * insert_node (Node ** head, Node * first, Node * second) {
 }
 
 /** concat_lists ()
- * joins end if 1st list to start of 2nd list
+ * joins end of 1st list to start of 2nd list
  * both lists are circular
  * input: last of 1st list, first of 2nd list
  */
-void concat_lists (Node ** head, Node ** first, Node ** second) {
-	if (* first == NULL) {
-		* head = * second;
+void concat_lists (Node ** head, Node * first, Node * second) {
+	if (first == NULL) {
+		* head = second;
 		return;
 	}
 
-	if (* second == NULL)
+	if (second == NULL)
 		return;
 	else {
-		(* first)->right->left = (* second)->left;
-		(* second)->left->right = (* first)->right;
-		(* first)->right = * second;
-		(* second)->left = * first;
+		first->right->left = second->left;
+		second->left->right = first->right;
+		first->right = second;
+		second->left = first;
 	}
 }
 
@@ -174,11 +154,23 @@ void print_list (Node * head) {
 	printf ("]\n");
 }
 
+void delete_list (Node * head) {
+	Node * it = head;
+	while (it != NULL) {
+		Node * curr = it;
+		it = it->right;
+		free (curr);
+		if (it == head)
+			break;
+	}
+}
+
 void test_create_list () {
 	Node * head = NULL;
 	int xs[] = {1,2,3};
 	head = create_list (head, xs, 3);
 	print_list (head);
+	delete_list (head);
 }
 
 void test_concat_lists () {
@@ -186,29 +178,26 @@ void test_concat_lists () {
 	Node * second = NULL;
 	Node * head = NULL;
 
-	int xs[] = {1};
-	int ys[] = {5};
+	int xs[] = {1,2,3,4};
+	int ys[] = {5,6,7,8};
+	int nx = 4, ny = 4;
 
-	for (int i = 0; i < 1; i++) {
+	for (int i = 0; i < nx; i++) {
 		Node * node = create_node (xs[i]);
 		first = insert_node (&head, first, node);
 	}
-	second = create_list (second, ys, 1);
-	printf ("%d\n", first->val);
-	printf ("%d\n", second->val);
-	printf ("%d\n", second->left->val);
+	second = create_list (second, ys, ny);
 
 	print_list (head);
 	print_list (second);
 
-	concat_lists (&head, &first, &second);
+	concat_lists (&head, first, second);
 	print_list (head);
-	printf ("%d\n", head->left->val);
 }
 
 /** tree2list ()
  * convert ordered BinaryTree to circular LinkedList
- * returns last node added
+ * maintains order of values; returns last node added
  */
 Node * tree2list (Node * root, Node ** head) {
 	if (root != NULL) {
@@ -221,22 +210,13 @@ Node * tree2list (Node * root, Node ** head) {
 		if (root->right != NULL)
 			larger = tree2list (root->right, head);
 
-		printf ("at node %d:\n", root->val);
-		print_list (smaller);
-		print_list (larger);
-
 		root->left = root;
 		root->right = root;
 		smaller = insert_node (head, smaller, root);
 		* head = smaller->right;
 
-		if (larger != NULL) {
-			printf ("larger->right = %d\n", larger->right->val);
-			printf ("smaller = %d\n", smaller->val);
-			concat_lists (head, &smaller, &(larger->right));
-		}
-
-		print_list (* head);
+		if (larger != NULL)
+			concat_lists (head, smaller, larger->right);
 
 		return (* head)->left;
 	} else
@@ -250,11 +230,11 @@ void test_tree2list () {
 	print_tree (tree, inorder);
 
 	Node * list = NULL;
-	Node * last = tree2list (tree, &list);
-	print_list (list);
+	tree2list (tree, &list);
+	print_list (list);		// same output as print_tree ()
+
+	delete_list (list);
 }
-
-
 
 void run_tests () {
 	// test_create_tree ();
