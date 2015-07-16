@@ -273,12 +273,35 @@ void reverse (LinkedList ** list) {
 	tail->next = NULL;
 }
 
+/** reverse_iter ()
+ * iterative reversal of LinkedList
+ * 3-node solution - O(n)
+ */
+void reverse_iter (LinkedList ** list) {
+	LinkedList * head = NULL, * tail = NULL;
+
+	while (* list != NULL) {
+		if (tail == NULL) {
+			tail = * list;
+			head = * list;
+			continue;
+		}
+		LinkedList * cur = head;	// 3rd node
+		head = * list;
+		* list = (* list)->next;		
+		head->next = cur;
+	}
+	* list = head;
+	tail->next = NULL;
+}
+
 void test_reverse () {
 	int xs[] = {1,2,3,4,5};
 	LinkedList * list = array2list (xs, SIZE);
 	print_list (list);
 
-	reverse (&list);
+	// reverse (&list);
+	reverse_iter (&list);
 	print_list (list);
 
 	delete_nodes (list);
@@ -382,7 +405,6 @@ void test_reverse_arrows_cont () {
 
 	delete_cont (cont);
 }
-
 
 /** All tests
  */

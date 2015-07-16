@@ -19,4 +19,7 @@ Other programs/ files:
 
 7. tl.c: The Great Tree-List Recursion Problem (http://cslibrary.stanford.edu/109)
 
+8. exs.c: Some more problems
+
 LinkedList: reverse, reverse_arrows, find_y_point, find_jn_cycle, delete_alt, print_alt
+Other problems: spiral_print_mat, add_ut 
