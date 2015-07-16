@@ -30,18 +30,24 @@ void delete_nodes (LinkedList * list) {
 	free (list);
 }
 
-void print_list (LinkedList * list) {
+void print_nodes (LinkedList * list) {
 	if (list != NULL) {
 		printf ("%d, ", list->val);
-		print_list (list->next);
+		print_nodes (list->next);
 	}
 }
 
-void print_alternate (LinkedList * list, int first) {
+void print_list (LinkedList * list) {
+	printf ("[");
+	print_nodes (list);
+	printf ("]\n");
+}
+
+void print_alt (LinkedList * list, int first) {
 	if (list != NULL) {
 		if (first)
 			printf ("%d, ", list->val);
-		print_alternate (list->next, (first + 1) % 2);
+		print_alt (list->next, (first + 1) % 2);
 	} 
 }
 
@@ -63,20 +69,28 @@ LinkedList * append_node (LinkedList * list, LinkedList * node) {
 	return list;
 }
 
-void test_print_alternate () {
-	int xs[] = {1,2,3,4,5};
+/** array2list ()
+ * create LinkedList from array
+ */
+LinkedList * array2list (int * xs, int size) {	
 	LinkedList * list = NULL;
-	for (int i = 0; i < SIZE; i++) {
+	for (int i = 0; i < size; i++) {
 		LinkedList * node = create_node (xs[i]);
 		if (list == NULL)
 			list = node;
 		else 
 			list = append_node (list, node);
 	}
-	
-	print_list (list); printf ("\n");
-	print_alternate (list, 1); printf ("\n");
-	print_alternate (list, 0); printf ("\n");
+	return list;
+}
+
+void test_print_alt () {
+	int xs[] = {1,2,3,4,5};
+	LinkedList * list = array2list (xs, SIZE);
+	print_list (list);
+
+	print_alt (list, 1); printf ("\n");
+	print_alt (list, 0); printf ("\n");
 
 	delete_nodes (list);
 }
@@ -152,8 +166,8 @@ void test_y_point () {
 	node1->next = node2;
 	list2->next = node1;
 
-	print_list (list); printf ("\n");
-	print_list (list2); printf ("\n");
+	print_list (list);
+	print_list (list2);
 
 	find_y_point (list, list2);
 }
@@ -201,14 +215,15 @@ void test_jn_cycle () {
 	}
 
 	last->next = jn;						// cycle introduced
-	// print_list (list); printf ("\n");	// don't print! testing only
+	// print_nodes (list); printf ("\n");	// don't print! testing only
 	find_jn_cycle (list);
 }
 
 /**
- * reverse_arrows (): in-place reversal of a linked list
+ * reverse_arrows ()
+ * reversal of a linked list (change links)
  * O(n) * O(n) = O(n^2)
- * For a linear solution, see, reverse_arrows_cont ()
+ * For a linear solution, see reverse (), reverse_arrows_cont ()
  */
 LinkedList * reverse_arrows (LinkedList * list) {
 	if (list == NULL)
@@ -225,23 +240,53 @@ LinkedList * reverse_arrows (LinkedList * list) {
 
 void test_reverse_arrows () {
 	int xs[] = {1,2,3,4,5};
-	LinkedList * list = NULL;
-	for (int i = 0; i < SIZE; i++) {
-		LinkedList * node = create_node (xs[i]);
-		if (list == NULL)
-			list = node;
-		else 
-			list = append_node (list, node);
-	}
-
-	print_list (list); printf ("\n");
+	LinkedList * list = array2list (xs, SIZE);
+	print_list (list);
 
 	list = reverse_arrows (list);
-	print_list (list); printf ("\n");
+	print_list (list);
 
 	delete_nodes (list);
 }
 
+/** reverse ()
+ * reverse a LinkedList, O(n)
+ * uses helper recursive function rev_rec ()
+ */
+void rev_rec (LinkedList ** list, LinkedList ** head, LinkedList ** tail) {
+	if (* list != NULL) {
+		rev_rec (&((* list)->next), head, tail);
+		if (* head == NULL) {
+			* head = * list;
+			* tail = * head;
+			return;
+		}
+		(* tail)->next = * list;
+		* tail = * list;
+	}
+}
+
+void reverse (LinkedList ** list) {
+	LinkedList * head = NULL, * tail = NULL;
+	rev_rec (list, &head, &tail);
+	* list = head;
+	tail->next = NULL;
+}
+
+void test_reverse () {
+	int xs[] = {1,2,3,4,5};
+	LinkedList * list = array2list (xs, SIZE);
+	print_list (list);
+
+	reverse (&list);
+	print_list (list);
+
+	delete_nodes (list);
+}
+
+/** delete_alt ()
+ * delete every alternate element, starting w/ 2nd
+ */
 void delete_alt (LinkedList * list) {
 	if (list != NULL) {
 		while (list->next != NULL) {
@@ -254,19 +299,12 @@ void delete_alt (LinkedList * list) {
 }
 
 void test_delete_alt () {
-	LinkedList * list = NULL;
-	for (int i = 0; i < SIZE; i++) {
-		LinkedList * node = create_node (i+1);
-		if (list == NULL)
-			list = node;
-		else 
-			list = append_node (list, node);
-	}
-
-	print_list (list); printf ("\n");
+	int xs[] = {1,2,3,4,5};
+	LinkedList * list = array2list (xs, SIZE);
+	print_list (list);
 
 	delete_alt (list);
-	print_list (list); printf ("\n");
+	print_list (list);
 
 	delete_nodes (list);
 }
@@ -299,7 +337,7 @@ LLContainer * append_cont (LLContainer * cont, LinkedList * node) {
 
 void print_LLContainer (LLContainer * cont) {
 	printf ("[ ");
-	print_list (cont->head);
+	print_nodes (cont->head);
 	printf (" ]\n");
 }
 
@@ -351,10 +389,11 @@ void test_reverse_arrows_cont () {
 void run_tests () {
 	// test_y_point ();
 	// test_reverse_arrows ();
-	// test_print_alternate ();
+	test_reverse ();
+	// test_print_alt ();
 	// test_reverse_arrows_cont ();
 	// test_delete_alt ();
-	test_jn_cycle ();
+	// test_jn_cycle ();
 }
 
 int main () {

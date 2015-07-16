@@ -119,6 +119,32 @@ void postorder (Node * root) {
 	}
 }
 
+void print_tabs (int cpos) {
+	printf ("\n");
+	for (int i = 0; i < cpos; i++) 
+		printf ("    ");
+}
+
+void pretty_rec (Node * root, int cpos) {
+	if (root != NULL) {
+		print_tabs (cpos - 1);
+		if (cpos > 0)
+			printf (" -- ");
+		printf ("%d", root->val);
+		pretty_rec (root->left, cpos + 1);
+		pretty_rec (root->right, cpos + 1);
+	}
+}
+
+/** pretty ()
+ * pretty printing of the tree
+ * pre-order traversal
+ */
+void pretty (Node * root) {
+	int n = 0;
+	pretty_rec (root, n);
+}
+
 void print_tree (Node * root, pf print) {
 	printf ("[");
 	print (root);
@@ -137,7 +163,7 @@ void test_create () {
 	Node * tree = NULL;
 	tree = create_basic_tree (tree, 1, 8);
 	print_tree (tree, inorder);
-	print_tree (tree, postorder);
+	print_tree (tree, pretty);
 	delete_tree (tree);
 
 	int xs[] = {8,0,2,7,0,1};
@@ -503,7 +529,7 @@ void test_is_bst2 () {
 }
 
 void run_tests () {
-	// test_create ();
+	test_create ();
 	// test_size ();
 	// test_max_depth ();
 	// test_min_max ();
@@ -515,7 +541,7 @@ void run_tests () {
 	// test_search_bt ();
 	// test_catalan ();
 	// test_is_bst1 ();
-	test_is_bst2 ();
+	// test_is_bst2 ();
 }
 
 int main () {

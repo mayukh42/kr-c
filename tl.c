@@ -57,6 +57,32 @@ void inorder (Node * root) {
 	}
 }
 
+void print_tabs (int cpos) {
+	printf ("\n");
+	for (int i = 0; i < cpos; i++) 
+		printf ("    ");
+}
+
+void pretty_rec (Node * root, int cpos) {
+	if (root != NULL) {
+		print_tabs (cpos - 1);
+		if (cpos > 0)
+			printf (" -- ");
+		printf ("%d", root->val);
+		pretty_rec (root->left, cpos + 1);
+		pretty_rec (root->right, cpos + 1);
+	}
+}
+
+/** pretty ()
+ * pretty printing of the tree
+ * pre-order traversal
+ */
+void pretty (Node * root) {
+	int n = 0;
+	pretty_rec (root, n);
+}
+
 void print_tree (Node * root, pf print) {
 	printf ("[");
 	print (root);
@@ -228,6 +254,7 @@ void test_tree2list () {
 	int xs[] = {1,2,3,4,5,6,7};
 	tree = create_tree (tree, xs, 0, 7);
 	print_tree (tree, inorder);
+	print_tree (tree, pretty);
 
 	Node * list = NULL;
 	tree2list (tree, &list);

@@ -13,10 +13,10 @@ Other programs/ files:
 
 4. bt.c: 14 BinaryTree problems (http://cslibrary.stanford.edu/110)
 
-5. ds.c: Some problems in DataStructures
-
-LinkedList: reverse_arrows, find_y_point, find_jn_cycle
+5. ds.c: Some problems in DataStructures, maily LinkedList
 
 6. text/: Text files for use in exercises
 
 7. tl.c: The Great Tree-List Recursion Problem (http://cslibrary.stanford.edu/109)
+
+LinkedList: reverse, reverse_arrows, find_y_point, find_jn_cycle, delete_alt, print_alt
