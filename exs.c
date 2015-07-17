@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /** author: mayukh
  * github.com/mayukh42
@@ -8,6 +9,8 @@
 /** Some random problems
  * and examples
  */
+
+#define MAXSIZE 31
 
 typedef struct Point {
 	int x;
@@ -126,9 +129,62 @@ void test_add_ut () {
 	delete_mat (xs, r);
 }
 
+void print_arr (int * xs, int size) {
+	printf ("[");
+	for (int i = 0; i < size; i++)
+		printf ("%d, ", xs[i]);
+	printf ("]\n"); 
+} 
+
+unsigned long hash_str (char * cs) {
+	unsigned long h = 0;
+	for (int i = 0; i < strlen (cs); i++)
+		h += 31 * h + cs[i];
+	return h;
+}
+
+void print_str_array (char ** cs, int size) {
+	printf ("[");
+	for (int i = 0; i < size; i++)
+		printf ("%s, ", cs[i]);
+	printf ("]\n");
+}
+
+/** str_array_diff ()
+ * difference between 2 arrays, the 2nd of which contain 
+ * one element that is not in 1st
+ */
+void str_array_diff (char ** first, char ** second, int size) {
+	int * xs = (int *) malloc (sizeof (int) * MAXSIZE);
+	for (int i = 0; i < size; i++) {
+		unsigned long h = hash_str (first[i]);
+		xs[h % MAXSIZE]++;
+	}
+	// print_arr (xs, MAXSIZE);
+	printf ("[");
+	for (int i = 0; i < size + 1; i++) {
+		unsigned long h = hash_str (second[i]);
+		if (! xs[h % MAXSIZE])
+			printf ("%s, ", second[i]);
+	}
+	printf ("]\n");
+	free (xs);
+}
+
+void test_str_array_diff () {
+	char * first[] = {"dog", "cat", "monkey"};
+	char * second[] = {"dog", "cat", "rat", "monkey"};
+	int size = 3;
+	// print_str_array (first, size);
+	// print_str_array (second, size + 1);
+
+	str_array_diff (first, second, size);
+}
+
 void run_tests () {
 	// test_spiral_print_mat ();
-	test_add_ut ();
+	// test_add_ut ();
+	test_str_array_diff ();
 }
 
 int main () {

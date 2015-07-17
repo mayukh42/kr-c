@@ -301,7 +301,7 @@ void test_create () {
 	print_tree (tree, pretty);
 	delete_tree (tree);
 
-	// balanced BST w/ given values (sorted)
+	// balanced BST w/ given values
 	tree = create_tree_proper (ys, 15);
 	print_tree (tree, inorder);
 	print_tree (tree, pretty);
