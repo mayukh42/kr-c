@@ -61,6 +61,29 @@ void insert (Node ** root, int value) {
 		return;
 }
 
+/** Rotation functions - rightrot () & leftrot ()
+ * to keep tree balanced during inserts
+ */
+void rightrot (Node ** root) {
+	if (* root == NULL || (* root)->left == NULL)
+		return;
+
+	Node * nroot = (* root)->left;
+	(* root)->left = nroot->right;
+	nroot->right = * root;
+	* root = nroot;
+}
+
+void leftrot (Node ** root) {
+	if (* root == NULL || (* root)->right == NULL)
+		return;
+
+	Node * nroot = (* root)->right;
+	(* root)->right = nroot->left;
+	nroot->left = * root;
+	* root = nroot;
+}
+
 /** 1 - create_basic_tree ()
  * creates a balanced BST w/ values in the given range 
  * including lower, excluding upper
@@ -80,7 +103,7 @@ Node * create_basic_tree (Node * root, int m, int n) {
  * creates a tree from list of values
  * list of values are same as in-order traversal of the created tree
  * if values are not sorted, the tree is not a BST
- * lo = 0, hi = len (xs): 1 more than last index
+ * lo = 0, hi = len (xs)
  */
 Node * create_tree (Node * root, int * xs, int lo, int hi) {
 	if (lo >= hi)
@@ -90,6 +113,12 @@ Node * create_tree (Node * root, int * xs, int lo, int hi) {
 	root = create_node (xs[midx]);
 	root->left = create_tree (root->left, xs, lo, midx);
 	root->right = create_tree (root->right, xs, midx + 1, hi);
+	return root;
+}
+
+Node * create_tree_with_insert (Node * root, int * xs, int n) {
+	for (int i = 0; i < n; i++) 
+		insert (&root, xs[i]);
 	return root;
 }
 
@@ -159,19 +188,6 @@ void delete_tree (Node * root) {
 	}
 }
 
-void test_create () {
-	Node * tree = NULL;
-	tree = create_basic_tree (tree, 1, 8);
-	print_tree (tree, inorder);
-	print_tree (tree, pretty);
-	delete_tree (tree);
-
-	int xs[] = {8,0,2,7,0,1};
-	tree = create_tree (tree, xs, 0, 6);
-	print_tree (tree, inorder);
-	delete_tree (tree);
-}
-
 /** 2 - size ()
  */
 int size (Node * root) {
@@ -221,11 +237,75 @@ void test_max_depth () {
 	printf ("Balanced check: %s\n", is_balanced (tree) == true ? "ok" : "not ok");
 }
 
+/** is_leaf ()
+ * check if node is leaf
+ */
 Bool is_leaf (Node * root) {
 	if (root != NULL && root->left == NULL && root->right == NULL)
 		return true;
 	else 
 		return false;
+}
+
+/** balance ()
+ * recursively balance the BST
+ */
+void balance (Node ** root) {
+	if ((* root) != NULL && ! is_leaf (* root)) {
+		int leftdepth = max_depth ((* root)->left);
+		int rightdepth = max_depth ((* root)->right);
+
+		if (leftdepth - rightdepth > 1)
+			rightrot (root);
+		else if (rightdepth - leftdepth > 1)
+			leftrot (root);
+
+		balance (&((* root)->left));
+		balance (&((* root)->right));
+	}
+}
+
+/** create_tree_proper ()
+ * creates a balanced BST from given array of values
+ * BST depth: O(lg n)
+ */
+Node * create_tree_proper (int * xs, int n) {
+	Node * root = NULL;
+	for (int i = 0; i < n; i++) {
+		insert (&root, xs[i]);
+		balance (&root);
+	}
+	return root;
+}
+
+void test_create () {
+	Node * tree = NULL;
+
+	// naive creation - BST
+	tree = create_basic_tree (tree, 1, 16);
+	print_tree (tree, inorder);
+	print_tree (tree, pretty);
+	delete_tree (tree);
+
+	// naive creation w/ given values - not a BST if values not sorted
+	int xs[] = {8,0,2,7,0,1};
+	tree = create_tree (tree, xs, 0, 6);
+	print_tree (tree, inorder);
+	print_tree (tree, pretty);
+	delete_tree (tree);
+
+	// unbalanced BST 
+	int ys[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+	tree = create_tree_with_insert (tree, ys, 15);
+	print_tree (tree, inorder);
+	print_tree (tree, pretty);
+	delete_tree (tree);
+
+	// balanced BST w/ given values (sorted)
+	tree = create_tree_proper (ys, 15);
+	print_tree (tree, inorder);
+	print_tree (tree, pretty);
+	delete_tree (tree);
 }
 
 /** 4 - min_val (), max_val ()
