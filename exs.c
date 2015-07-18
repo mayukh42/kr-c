@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 /** author: mayukh
  * github.com/mayukh42
@@ -138,7 +139,7 @@ void print_arr (int * xs, int size) {
 
 unsigned long hash_str (char * cs) {
 	unsigned long h = 0;
-	for (int i = 0; i < strlen (cs); i++)
+	for (unsigned i = 0; i < strlen (cs); i++)
 		h += 31 * h + cs[i];
 	return h;
 }
@@ -181,10 +182,57 @@ void test_str_array_diff () {
 	str_array_diff (first, second, size);
 }
 
+/** gcd ()
+ * find the gcd of 2 numbers
+ */
+unsigned gcd (unsigned m, unsigned n) {
+	if (m > n)
+		return gcd (m-n, n);
+	else if (m < n)
+		return gcd (m, n-m);
+	else
+		return m;
+}
+
+/** double2rational ()
+ * convert a double number to rational fraction
+ */
+void double2rational (double n) {
+	double whole = floor (n);
+	double decimal = n - whole;
+	if (decimal == 0.0)
+		decimal = 1.0;
+	double base = 10.0, multiplier = 1.0, tolerance = 0.0001;
+
+	while (decimal - floor (decimal) >= tolerance) {
+		decimal *= base;
+		multiplier *= base;
+	}	
+
+	unsigned factor = gcd ((unsigned) decimal, (unsigned) multiplier);
+	decimal /= (double) factor;
+	multiplier /= (double) factor;
+
+	printf ("rational fraction of %.8f = %ld %ld/%ld\n", 
+		n, (long) whole, (long) decimal, (long) multiplier);
+}
+
+void test_gcm_double2rational () {
+	int m = 6, n = 9;
+	printf ("gcd of %d and %d = %d\n", m, n, gcd (m, n));
+
+	double2rational (1234.5678);
+	double2rational (0.5223);
+	double2rational (1.125);
+	double2rational (6.116);	// not quite the ouput we want
+	double2rational (42.0);
+}
+
 void run_tests () {
 	// test_spiral_print_mat ();
 	// test_add_ut ();
-	test_str_array_diff ();
+	// test_str_array_diff ();
+	test_gcm_double2rational ();
 }
 
 int main () {
