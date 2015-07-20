@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 /** author: mayukh
  * github.com/mayukh42
@@ -107,7 +108,7 @@ Bool is_equal_upto (char * first, char * second, int n) {
 }
 
 void test_basic_utilities () {
-	char cs[] = "hello";
+	char cs[] = "hellgate";
 	char ds[] = "hello";
 	Bool eq = is_equal (cs, ds);
 	int idx = 3;
@@ -135,10 +136,61 @@ void naive_matcher (char * text, char * pat) {
 	}
 }
 
-void test_matchers () {
+void test_naive () {
+	char cs[] = "2359023141526739921";
+	char ds[] = "59023141526";	
+	naive_matcher (cs, ds);
+}
+
+/** Rabin-Karp algorithm
+ * Prime used: 2147483647 (2^31 - 1)
+ */
+const char * alphabets = " abcdefghijklmnopqrstuvwxyz";
+
+/** get_radix_digit ()
+ * returns the digit in d-ary alphabet in O(1)
+ */
+int get_radix_digit (char c) {
+	return c == ' ' ? 0 : c - 'a' + 1;
+}
+
+/** rk_matcher ()
+ * Rabin-Karp algorithm for string matching
+ * O(n-m+1 . m) w/ better avg performance
+ */
+void rk_matcher (char * text, char * pat, int radix, int q) {
+	int tlen = strlen (text), plen = strlen (pat);
+	long h = ((long) pow (radix * 1.0, (plen - 1) * 1.0)) % q;
+	long m = 0, ts = 0;
+
+	// preprocessing
+	for (int i = 0; i < plen; i++) {
+		int cval_p = get_radix_digit (pat[i]);
+		int cval_t = get_radix_digit (text[i]);
+		m = (radix * m + cval_p) % q;
+		ts = (radix * ts + cval_t) % q;
+	}
+
+	for (int s = 0; s < tlen - plen + 1; s++) {
+		if (m == ts) {
+			if (is_equal_upto (pat, text + s, plen - 1))
+				printf ("strings match at shift %d\n", s);
+		}
+		if (s < tlen - plen)
+			ts = (radix * (ts - get_radix_digit (text[s]) * h) + 
+				get_radix_digit (text[s + plen])) % q;
+	}
+}
+
+void test_rabin_karp () {
 	char cs[] = "naive string matcher algorithm for strings";
 	char ds[] = "string";
-	naive_matcher (cs, ds);
+	rk_matcher (cs, ds, 27, 2147483647);
+}
+
+void test_matchers () {
+	// test_naive ();
+	test_rabin_karp ();
 }
 
 void run_tests () {
