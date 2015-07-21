@@ -107,6 +107,12 @@ Bool is_equal_upto (char * first, char * second, int n) {
 			is_equal_upto (first + 1, second + 1, n - 1);
 }
 
+void print_upto (char * str, int idx) {
+	for (int i = 0; i <= idx; i++)
+		printf ("%c", str[i]);
+	printf ("\n");
+}
+
 void test_basic_utilities () {
 	char cs[] = "hellgate";
 	char ds[] = "hello";
@@ -116,6 +122,7 @@ void test_basic_utilities () {
 
 	printf ("the strings are %sequal\n", eq ? "" : "not ");
 	printf ("the strings are %sequal upto index %d\n", eq_upto ? "" : "not ", idx);
+	print_upto (cs, 3);
 }
 
 
@@ -142,21 +149,13 @@ void test_naive () {
 	naive_matcher (cs, ds);
 }
 
-/** Rabin-Karp algorithm
- * Prime used: 2147483647 (2^31 - 1)
- */
-const char * alphabets = " abcdefghijklmnopqrstuvwxyz";
-
-/** get_radix_digit ()
- * returns the digit in d-ary alphabet in O(1)
- */
-int get_radix_digit (char c) {
-	return c == ' ' ? 0 : c - 'a' + 1;
-}
-
 /** rk_matcher ()
  * Rabin-Karp algorithm for string matching
  * O(n-m+1 . m) w/ better avg performance
+
+ * Power of 2 used = 65536 (2^16)
+ * Prime = 2147483647 (2^31 - 1); @TODO: does not work always
+ * Alphabet = 8 bit ASCII; base = 256
  */
 void rk_matcher (char * text, char * pat, int radix, int q) {
 	int tlen = strlen (text), plen = strlen (pat);
@@ -165,27 +164,32 @@ void rk_matcher (char * text, char * pat, int radix, int q) {
 
 	// preprocessing
 	for (int i = 0; i < plen; i++) {
-		int cval_p = get_radix_digit (pat[i]);
-		int cval_t = get_radix_digit (text[i]);
-		m = (radix * m + cval_p) % q;
-		ts = (radix * ts + cval_t) % q;
+		m = (radix * m + pat[i]) % q;
+		ts = (radix * ts + text[i]) % q;
 	}
 
+	// matching
+	printf ("looking for a match of \"%s\":\n", pat);
 	for (int s = 0; s < tlen - plen + 1; s++) {
 		if (m == ts) {
 			if (is_equal_upto (pat, text + s, plen - 1))
 				printf ("strings match at shift %d\n", s);
 		}
 		if (s < tlen - plen)
-			ts = (radix * (ts - get_radix_digit (text[s]) * h) + 
-				get_radix_digit (text[s + plen])) % q;
+			ts = (radix * (ts - text[s] * h) + text[s + plen]) % q;
 	}
 }
 
 void test_rabin_karp () {
+	int base = 256, q = 65536;
+
 	char cs[] = "naive string matcher algorithm for strings";
 	char ds[] = "string";
-	rk_matcher (cs, ds, 27, 2147483647);
+	rk_matcher (cs, ds, base, q);
+
+	char es[] = "2359023141526739921";
+	char fs[] = "90231415267";	
+	rk_matcher (es, fs, base, q);
 }
 
 void test_matchers () {
