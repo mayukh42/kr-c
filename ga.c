@@ -38,7 +38,7 @@ List * create_listnode (GNode * w_node) {
 	return listnode;
 }
 
-void push_adj (List ** list, GNode * w_node) {
+void push_list (List ** list, GNode * w_node) {
 	List * listnode = create_listnode (w_node);
 
 	if (* list == NULL) {
@@ -50,12 +50,31 @@ void push_adj (List ** list, GNode * w_node) {
 	* list = listnode;
 }
 
+List * append_list (List * last, List * node) {
+	if (last == NULL)
+		return node;
+
+	last->next = node;
+	last = node;
+	return last;
+}
+
+GNode * pop (List ** list) {
+	if (* list == NULL)
+		return NULL;
+
+	List * head = * list;
+	GNode * headnode = head->node;
+	* list = head->next;
+	free (head);
+	return headnode;
+}
+
 void print_node (GNode * node);
 
 void print_list_rec (List * list) {
 	if (list != NULL) {
 		print_node (list->node);
-		printf (", ");
 		print_list_rec (list->next);
 	}
 }
@@ -64,6 +83,13 @@ void print_list (List * list) {
 	printf ("[");
 	print_list_rec (list);
 	printf ("]\n");
+}
+
+void delete_list (List * list) {
+	if (list != NULL) {
+		delete_list (list->next);
+		free (list);
+	}
 }
 
 GNode * create_gnode (int value) {
@@ -75,9 +101,16 @@ GNode * create_gnode (int value) {
 	return node;
 }
 
+void delete_gnode (GNode * node) {
+	if (node != NULL) {
+		delete_list (node->adjlist);
+		free (node);
+	}
+}
+
 void print_node (GNode * node) {
 	if (node != NULL)
-		printf ("%d-%d", node->val, node->deg);
+		printf ("%d-%d, ", node->val, node->deg);
 }
 
 void print_graph (GNode * node) {
@@ -95,32 +128,154 @@ void print_graph (GNode * node) {
 	}
 }
 
+/** add_edge ()
+ * adds a directed edge v->w
+ */
 void add_edge (GNode * v, GNode * w) {
 	if (v == NULL || w == NULL)
 		return;
 
-	push_adj (&(v->adjlist), w);
+	push_list (&(v->adjlist), w);
 	v->deg++;
 }
 
-void test_create_graph () {
-	int xs[] = {1,2,3,4,5};
-	GNode * node1 = create_gnode (xs[0]);
-	GNode * node2 = create_gnode (xs[1]);
-	GNode * node3 = create_gnode (xs[2]);
-	GNode * node4 = create_gnode (xs[3]);
+/** struct Queue
+ * container queue for graph traversal
+ */
+typedef struct Queue {
+	List * head;
+	List * tail;
+} Queue;
 
-	add_edge (node1, node2);
-	add_edge (node1, node3);
-	add_edge (node1, node4);
-	add_edge (node2, node3);
-	add_edge (node2, node4);
-
-	print_graph (node1);
+Queue * create_empty_queue () {
+	Queue * q = (Queue *) malloc (sizeof (Queue));
+	q->head = NULL;
+	q->tail = NULL;
+	return q;
 }
 
+void enq (Queue * q, List * node) {
+	if (node == NULL || q == NULL)
+		return;
+
+	if (q->head == NULL) {
+		q->head = node;
+		q->tail = node;
+		return;
+	}
+
+	q->tail->next = node;
+	q->tail = node;
+}
+
+List * deq (Queue * q) {
+	if (q == NULL)
+		return NULL;
+
+	if (q->head == NULL)
+		return NULL;
+
+	List * node = q->head;
+	q->head = node->next;
+	
+	if (node->next == NULL)
+		q->tail = NULL;
+
+	return node;
+}
+
+Bool is_empty (Queue * q) {
+	if (q == NULL)
+		return true;
+
+	return q->head == NULL;
+}
+
+void print_queue (Queue * q) {
+	print_list (q->head);
+}
+
+void test_queue () {
+	Queue * q = create_empty_queue ();
+	int xs[] = {1,2,3,4,5};
+	unsigned n = 5;
+
+	while (n > 0) {
+		GNode * node = create_gnode (xs[n-1]);
+		List * listnode = create_listnode (node);
+		enq (q, listnode);
+		n--;
+	}
+	print_queue (q);
+
+	while (!is_empty (q)) {
+		List * it = deq (q);
+		print_node (it->node);
+		delete_gnode (it->node);
+		free (it);
+	}
+	printf ("\n");
+	free (q);
+}
+
+void bfs (GNode * v) {
+	if (v == NULL)
+		return;
+
+	Queue * q = create_empty_queue ();
+	v->status = true;
+	List * q_node = create_listnode (v);
+	enq (q, q_node);
+
+	while (!is_empty (q)) {
+		List * it = deq (q);
+		GNode * vertex = it->node;
+		print_node (vertex); 
+		free (it);
+
+		List * neighbors = vertex->adjlist;
+		while (neighbors != NULL) {
+			if (neighbors->node != NULL && !neighbors->node->status) {
+				neighbors->node->status = true;
+				List * q_it = create_listnode (neighbors->node);
+				enq (q, q_it);
+			}
+			neighbors = neighbors->next;
+		}
+	}
+	printf ("\n");
+	free (q);
+}
+
+void test_graph () {
+	int xs[] = {1,2,3,4,5,6};
+	unsigned v = 6;
+	GNode ** vs = malloc (sizeof (GNode *) * v);
+
+	for (unsigned i = 0; i < v; i++)
+		vs[i] = create_gnode (xs[i]);
+
+	add_edge (vs[0], vs[1]);
+	add_edge (vs[0], vs[3]);
+	add_edge (vs[3], vs[1]);
+	add_edge (vs[4], vs[3]);
+	add_edge (vs[1], vs[4]);
+	add_edge (vs[4], vs[2]);
+	add_edge (vs[2], vs[5]);
+
+	// print_graph (vs[0]);
+
+	bfs (vs[0]);
+
+	for (unsigned i = 0; i < v; i++)
+		delete_gnode (vs[i]);
+	free (vs);
+}
+
+
 void run_tests () {
-	test_create_graph ();	
+	test_graph ();	
+	// test_queue ();
 }
 
 int main () {
