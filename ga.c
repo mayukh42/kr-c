@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /** author: mayukh
  * github.com/mayukh42
@@ -122,7 +123,7 @@ void print_node_adjlist (GNode * node) {
 }
 
 /** dfs ()
- * Depth First Search traversal of the graph
+ * Depth-First Search traversal of the graph
  */
 void dfs_rec (GNode * node, Bool color) {
 	if (node != NULL && node->status == color) {
@@ -234,7 +235,7 @@ void test_queue () {
 }
 
 /** bfs ()
- * Breadth First Search traversal of the graph
+ * Breadth-First Search traversal of the graph
  */
 void bfs (GNode * v) {
 	if (v == NULL)
@@ -266,25 +267,19 @@ void bfs (GNode * v) {
 	free (q);
 }
 
-void test_graph () {
+void test_graph_traversals () {
 	int xs[] = {1,2,3,4,5,6,7,8,9,10,11,12};
+	int es[11][2] = {{1,2}, {1,3}, {1,4}, {2,5}, {2,6}, {4,7}, {4,8}, {5,9}, {5,10}, {7,11}, {7,12}};	
+
 	unsigned v = 12;
+	unsigned e = 11;	
 	GNode ** vs = malloc (sizeof (GNode *) * v);
 
 	for (unsigned i = 0; i < v; i++)
 		vs[i] = create_gnode (xs[i]);
 
-	add_edge (vs[0], vs[1]);
-	add_edge (vs[0], vs[2]);
-	add_edge (vs[0], vs[3]);
-	add_edge (vs[1], vs[4]);
-	add_edge (vs[1], vs[5]);
-	add_edge (vs[3], vs[6]);
-	add_edge (vs[3], vs[7]);
-	add_edge (vs[4], vs[8]);
-	add_edge (vs[4], vs[9]);
-	add_edge (vs[6], vs[10]);
-	add_edge (vs[6], vs[11]);
+	for (unsigned i = 0; i < e; i++) 
+		add_edge (vs[es[i][0] - 1], vs[es[i][1] - 1]);
 
 	printf ("dfs traversal: \n");
 	dfs (vs[0]);
@@ -299,7 +294,7 @@ void test_graph () {
 
 
 void run_tests () {
-	test_graph ();	
+	test_graph_traversals ();	
 	// test_queue ();
 }
 
