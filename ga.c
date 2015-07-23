@@ -113,19 +113,34 @@ void print_node (GNode * node) {
 		printf ("%d-%d, ", node->val, node->deg);
 }
 
-void print_graph (GNode * node) {
-	if (node != NULL && !node->status) {
+void print_node_adjlist (GNode * node) {
+	if (node != NULL) {
 		print_node (node);
 		printf (": ");
 		print_list (node->adjlist);
-		node->status = true;
+	}
+}
+
+/** dfs ()
+ * Depth First Search traversal of the graph
+ */
+void dfs_rec (GNode * node, Bool color) {
+	if (node != NULL && node->status == color) {
+		print_node_adjlist (node);
+		node->status = !color;
 
 		List * it = node->adjlist;
 		while (it != NULL) {
-			print_graph (it->node);
+			if (it->node != NULL && it->node->status == color)
+				dfs_rec (it->node, color);
 			it = it->next;
 		}
 	}
+}
+
+void dfs (GNode * node) {
+	if (node != NULL)
+		dfs_rec (node, node->status);
 }
 
 /** add_edge ()
@@ -218,25 +233,29 @@ void test_queue () {
 	free (q);
 }
 
+/** bfs ()
+ * Breadth First Search traversal of the graph
+ */
 void bfs (GNode * v) {
 	if (v == NULL)
 		return;
 
+	Bool color = v->status;	// to toggle color (status) on each run
 	Queue * q = create_empty_queue ();
-	v->status = true;
+	v->status = !color;
 	List * q_node = create_listnode (v);
 	enq (q, q_node);
 
 	while (!is_empty (q)) {
 		List * it = deq (q);
 		GNode * vertex = it->node;
-		print_node (vertex); 
+		print_node_adjlist (vertex); 
 		free (it);
 
 		List * neighbors = vertex->adjlist;
 		while (neighbors != NULL) {
-			if (neighbors->node != NULL && !neighbors->node->status) {
-				neighbors->node->status = true;
+			if (neighbors->node != NULL && neighbors->node->status == color) {
+				neighbors->node->status = !color;
 				List * q_it = create_listnode (neighbors->node);
 				enq (q, q_it);
 			}
@@ -248,23 +267,29 @@ void bfs (GNode * v) {
 }
 
 void test_graph () {
-	int xs[] = {1,2,3,4,5,6};
-	unsigned v = 6;
+	int xs[] = {1,2,3,4,5,6,7,8,9,10,11,12};
+	unsigned v = 12;
 	GNode ** vs = malloc (sizeof (GNode *) * v);
 
 	for (unsigned i = 0; i < v; i++)
 		vs[i] = create_gnode (xs[i]);
 
 	add_edge (vs[0], vs[1]);
+	add_edge (vs[0], vs[2]);
 	add_edge (vs[0], vs[3]);
-	add_edge (vs[3], vs[1]);
-	add_edge (vs[4], vs[3]);
 	add_edge (vs[1], vs[4]);
-	add_edge (vs[4], vs[2]);
-	add_edge (vs[2], vs[5]);
+	add_edge (vs[1], vs[5]);
+	add_edge (vs[3], vs[6]);
+	add_edge (vs[3], vs[7]);
+	add_edge (vs[4], vs[8]);
+	add_edge (vs[4], vs[9]);
+	add_edge (vs[6], vs[10]);
+	add_edge (vs[6], vs[11]);
 
-	// print_graph (vs[0]);
+	printf ("dfs traversal: \n");
+	dfs (vs[0]);
 
+	printf ("bfs traversal: \n");
 	bfs (vs[0]);
 
 	for (unsigned i = 0; i < v; i++)
