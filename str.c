@@ -8,6 +8,7 @@
  */
 
 #define MAXSIZE 32
+#define MAXSYM 256
 
 typedef enum Bool {
 	false,
@@ -192,9 +193,40 @@ void test_rabin_karp () {
 	rk_matcher (es, fs, base, q);
 }
 
+void print_int_array (int * xs, unsigned n) {
+	printf ("[");
+	for (unsigned i = 0; i < MAXSYM; i++)
+		printf ("%d ", xs[i]);
+	printf ("]\n");
+}
+
+/** bm_matcher ()
+ * Boyer-Moore matcher algorithm
+ */
+void bm_matcher (char * text, char * pat) {
+	int * last_idx = (int *) malloc (sizeof (int) * MAXSYM);
+	for (unsigned i = 0; i < MAXSYM; i++)
+		last_idx[i] = -1;
+
+	unsigned n = strlen (text), m = strlen (pat);
+	for (unsigned i = 0; i < m; i++)
+		last_idx[pat[i]] = i;
+
+	print_int_array (last_idx, MAXSYM);
+	free (last_idx);
+}
+
+void test_boyer_moore () {
+	char text[] = "naive string matcher algorithm for strings";
+	char pat[] = "string";
+
+	bm_matcher (text, pat);
+}
+
 void test_matchers () {
 	// test_naive ();
-	test_rabin_karp ();
+	// test_rabin_karp ();
+	test_boyer_moore ();
 }
 
 void run_tests () {
