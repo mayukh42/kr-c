@@ -195,32 +195,58 @@ void test_rabin_karp () {
 
 void print_int_array (int * xs, unsigned n) {
 	printf ("[");
-	for (unsigned i = 0; i < MAXSYM; i++)
+	for (unsigned i = 0; i < n; i++)
 		printf ("%d ", xs[i]);
 	printf ("]\n");
 }
 
 /** bm_matcher ()
  * Boyer-Moore matcher algorithm
+ * matches all occurrences
  */
 void bm_matcher (char * text, char * pat) {
+	unsigned n = strlen (text), m = strlen (pat);
+	if (n < m || n == 0 || m == 0)
+		return;
+
 	int * last_idx = (int *) malloc (sizeof (int) * MAXSYM);
 	for (unsigned i = 0; i < MAXSYM; i++)
 		last_idx[i] = -1;
-
-	unsigned n = strlen (text), m = strlen (pat);
+	
 	for (unsigned i = 0; i < m; i++)
 		last_idx[pat[i]] = i;
 
-	print_int_array (last_idx, MAXSYM);
+	// print_int_array (last_idx, MAXSYM);
+	unsigned i = 0;
+	while (i < n - m + 1) {
+		int j = m - 1, k = i + j;
+		while (j >= 0 && pat[j] == text[k]) {
+			j--;
+			k--;
+		}
+		printf ("i = %d, j = %d, k = %d\n", i, j, k);
+		if (j == -1) {
+			printf ("shift occurs at %u for \"%s\"\n", i, pat);
+			i++;
+		} else {
+			if (last_idx[text[k]] != -1)
+				i += last_idx[pat[j]];
+			else
+				i += m;
+		}		
+	}
+
 	free (last_idx);
 }
 
 void test_boyer_moore () {
-	char text[] = "naive string matcher algorithm for strings";
-	char pat[] = "string";
+	char cs[] = "findinahaystackneedleinahaystackneedlefindneedleinahaystack";
+	char ds[] = "needle";
+	bm_matcher (cs, ds);
 
-	bm_matcher (text, pat);
+	// char es[] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+	// char fs[] = "aaaaaaaaa";
+	// bm_matcher (es, fs);
 }
 
 void test_matchers () {
