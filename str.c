@@ -203,6 +203,7 @@ void print_int_array (int * xs, unsigned n) {
 /** bm_matcher ()
  * Boyer-Moore matcher algorithm
  * matches all occurrences
+ * O (m/n) avg
  */
 void bm_matcher (char * text, char * pat) {
 	unsigned n = strlen (text), m = strlen (pat);
@@ -219,18 +220,16 @@ void bm_matcher (char * text, char * pat) {
 	// print_int_array (last_idx, MAXSYM);
 	unsigned i = 0;
 	while (i < n - m + 1) {
-		int j = m - 1, k = i + j;
-		while (j >= 0 && pat[j] == text[k]) {
+		int j = m - 1;
+		while (j >= 0 && pat[j] == text[i + j])
 			j--;
-			k--;
-		}
-		printf ("i = %d, j = %d, k = %d\n", i, j, k);
+
 		if (j == -1) {
-			printf ("shift occurs at %u for \"%s\"\n", i, pat);
+			printf ("shift occurs at %u for '%s'\n", i, pat);
 			i++;
 		} else {
-			if (last_idx[text[k]] != -1)
-				i += last_idx[pat[j]];
+			if (last_idx[text[i + j]] != -1)
+				i += j - last_idx[text[i + j]];
 			else
 				i += m;
 		}		
@@ -240,13 +239,13 @@ void bm_matcher (char * text, char * pat) {
 }
 
 void test_boyer_moore () {
-	char cs[] = "findinahaystackneedleinahaystackneedlefindneedleinahaystack";
+	char cs[] = "findinahaystackneedleinahaystackneedlefindallneedles";
 	char ds[] = "needle";
 	bm_matcher (cs, ds);
 
-	// char es[] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-	// char fs[] = "aaaaaaaaa";
-	// bm_matcher (es, fs);
+	char es[] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";		// worst case for Boyer Moore
+	char fs[] = "aaaaaaaaa";
+	bm_matcher (es, fs);
 }
 
 void test_matchers () {
