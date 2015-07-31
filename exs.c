@@ -217,7 +217,7 @@ void double2rational (double n) {
 		n, (long) whole, (long) decimal, (long) multiplier);
 }
 
-void test_gcm_double2rational () {
+void test_gcd_double2rational () {
 	int m = 6, n = 9;
 	printf ("gcd of %d and %d = %d\n", m, n, gcd (m, n));
 
@@ -228,11 +228,48 @@ void test_gcm_double2rational () {
 	double2rational (42.0);
 }
 
+/** reverse_num ()
+ * reverse a positive number in a given base
+ */
+unsigned reverse_num (unsigned n, unsigned radix) {
+	unsigned i = 0;
+	while (n > 0) {
+		i = i * radix + (n % radix);
+		n = n / radix;
+	}
+	return i;
+}
+
+/** find_circles_within ()
+ * finds all x, y $ x^2 + y^2 < n
+ */
+void find_circles_within (unsigned n) {
+	unsigned x = 0, y = 0;
+	printf ("  x\t  y\n");
+	while (x * x + y * y < n) {
+		printf ("%3u\t%3u\n", x, y);
+		y++;
+		while (x * x + y * y < n) {
+			printf ("%3u\t%3u\n", x, y);
+			y++;
+		}
+		y = 0;
+		x++;
+	}
+}
+
+void test_numbers () {
+	// unsigned d = 173;
+	// printf ("reverse of %u = %u\n", d, reverse_num (d, 10));
+	find_circles_within (5);
+}
+
 void run_tests () {
 	// test_spiral_print_mat ();
 	// test_add_ut ();
 	// test_str_array_diff ();
-	test_gcm_double2rational ();
+	// test_gcd_double2rational ();
+	test_numbers ();
 }
 
 int main () {

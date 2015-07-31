@@ -39,53 +39,6 @@ void test_remove_at () {
 	free (ds);
 }
 
-/** permute ()
- * print all permutations of a given string
- */
-void permute (char * cs, char * buf, int last) {
-	if (strlen (cs) == 0) {
-		buf[last] = '\0';
-		printf ("%s\n", buf);
-	} else {
-		for (unsigned i = 0; i < strlen (cs); i++) {
-			buf[last] = cs[i];
-			char * rest = remove_at (cs, i);
-			permute (rest, buf, last + 1);
-			free (rest);
-		}
-	}
-}
-
-/** subsets ()
- * print all subsets of the given string, including the empty string
- */
-void subsets (char * cs, char * buf, int last) {
-	if (strlen (cs) == 0) {
-		buf[last] = '\0';
-		printf ("%s\n", buf);
-	} else {
-		char c = cs[0];
-		char * rest = remove_at (cs, 0);
-		subsets (rest, buf, last);
-		buf[last] = c;
-		subsets (rest, buf, last + 1);
-		free (rest);
-	}
-}
-
-void test_combinatorics () {
-	char * buf = (char *) malloc (sizeof (char) * MAXSIZE);
-	char cs[] = "abc";
-
-	printf ("\npermutations of %s:\n", cs);
-	permute (cs, buf, 0);
-	
-	printf ("\nsubsets of %s:\n", cs);
-	subsets (cs, buf, 0);
-
-	free (buf);
-}
-
 /** is_equal ()
  * returns true iff 2 strings are equal
  */
@@ -126,6 +79,74 @@ void test_basic_utilities () {
 	print_upto (cs, 3);
 }
 
+/** permute ()
+ * print all permutations of a given string
+ */
+void permute (char * cs, char * buf, int last) {
+	if (strlen (cs) == 0) {
+		buf[last] = '\0';
+		printf ("%s\n", buf);
+	} else {
+		for (unsigned i = 0; i < strlen (cs); i++) {
+			buf[last] = cs[i];
+			char * rest = remove_at (cs, i);
+			permute (rest, buf, last + 1);
+			free (rest);
+		}
+	}
+}
+
+/** subsets ()
+ * print all subsets of the given string, including the empty string
+ */
+void subsets (char * cs, char * buf, int last) {
+	if (strlen (cs) == 0) {
+		buf[last] = '\0';
+		printf ("%s\n", buf);
+	} else {
+		char c = cs[0];
+		char * rest = remove_at (cs, 0);
+		subsets (rest, buf, last);
+		buf[last] = c;
+		subsets (rest, buf, last + 1);
+		free (rest);
+	}
+}
+
+/** sequences ()
+ * print all sequences of length k composed of given alphabet
+ * includes repetitions
+ * assumes alphabet is a collection of unique chars
+ */
+void sequences (char * cs, char * buf, unsigned k, unsigned j) {
+	if (j == k) {
+		buf[k] = '\0';
+		printf ("%s\n", buf);
+	} else {
+		for (unsigned i = 0; i < strlen (cs); i++) {
+			buf[j] = cs[i];
+			sequences (cs, buf, k, j + 1);
+		}
+	}
+}
+
+void test_combinatorics () {
+	char * buf = (char *) malloc (sizeof (char) * MAXSIZE);
+	char cs[] = "abc";
+
+	printf ("\npermutations of %s:\n", cs);
+	permute (cs, buf, 0);
+	
+	printf ("\nsubsets of %s:\n", cs);
+	subsets (cs, buf, 0);
+
+	unsigned len = 2;
+	printf ("\nsequences of alphabet %s, length = %d:\n", cs, len);
+	sequences (cs, buf, len, 0);
+
+	free (buf);
+}
+
 
 /** String matching algorithms
  */
@@ -150,7 +171,7 @@ void test_naive () {
 	naive_matcher (cs, ds);
 }
 
-/** rk_matcher ()
+/** rabin_karp ()
  * Rabin-Karp algorithm for string matching
  * O(n-m+1 . m) w/ better avg performance
 
@@ -158,7 +179,7 @@ void test_naive () {
  * Prime = 2147483647 (2^31 - 1); @TODO: does not work always
  * Alphabet = 8 bit ASCII; base = 256
  */
-void rk_matcher (char * text, char * pat, int radix, int q) {
+void rabin_karp (char * text, char * pat, int radix, int q) {
 	int tlen = strlen (text), plen = strlen (pat);
 	long h = ((long) pow (radix * 1.0, (plen - 1) * 1.0)) % q;
 	long m = 0, ts = 0;
@@ -186,11 +207,11 @@ void test_rabin_karp () {
 
 	char cs[] = "naive string matcher algorithm for strings";
 	char ds[] = "string";
-	rk_matcher (cs, ds, base, q);
+	rabin_karp (cs, ds, base, q);
 
 	char es[] = "2359023141526739921";
 	char fs[] = "90231415267";	
-	rk_matcher (es, fs, base, q);
+	rabin_karp (es, fs, base, q);
 }
 
 void print_int_array (int * xs, unsigned n) {
@@ -200,12 +221,12 @@ void print_int_array (int * xs, unsigned n) {
 	printf ("]\n");
 }
 
-/** bm_matcher ()
- * Boyer-Moore matcher algorithm
+/** boyer_moore ()
+ * Boyer-Moore string matcher algorithm
  * matches all occurrences
  * O (m/n) avg
  */
-void bm_matcher (char * text, char * pat) {
+void boyer_moore (char * text, char * pat) {
 	unsigned n = strlen (text), m = strlen (pat);
 	if (n < m || n == 0 || m == 0)
 		return;
@@ -217,7 +238,6 @@ void bm_matcher (char * text, char * pat) {
 	for (unsigned i = 0; i < m; i++)
 		last_idx[pat[i]] = i;
 
-	// print_int_array (last_idx, MAXSYM);
 	unsigned i = 0;
 	while (i < n - m + 1) {
 		int j = m - 1;
@@ -241,11 +261,11 @@ void bm_matcher (char * text, char * pat) {
 void test_boyer_moore () {
 	char cs[] = "findinahaystackneedleinahaystackneedlefindallneedles";
 	char ds[] = "needle";
-	bm_matcher (cs, ds);
+	boyer_moore (cs, ds);
 
 	char es[] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";		// worst case for Boyer Moore
 	char fs[] = "aaaaaaaaa";
-	bm_matcher (es, fs);
+	boyer_moore (es, fs);
 }
 
 void test_matchers () {
@@ -256,9 +276,9 @@ void test_matchers () {
 
 void run_tests () {
 	// test_remove_at ();
-	// test_combinatorics ();
 	// test_basic_utilities ();
-	test_matchers ();
+	test_combinatorics ();
+	// test_matchers ();
 }
 
 int main () {
