@@ -13,11 +13,10 @@
 
 #define MAXSIZE 31
 
-typedef struct Point {
-	int x;
-	int y;
-} Point;
-
+typedef enum Bool {
+	false, 
+	true
+} Bool;
 
 /** 2D Matrix Utility functions
  */
@@ -258,10 +257,77 @@ void find_circles_within (unsigned n) {
 	}
 }
 
+/** factors ()
+ * prints all factors of n
+ */
+void factors (unsigned n) {
+	if (n == 0)
+		return;
+
+	printf ("factors of %u:\n", n);
+	unsigned a = 1, b = n;
+	while (a <= b) {
+		if (a * b == n)
+			printf ("%u, %u\n", a, b);
+		a++; 
+		b = n / a;
+	}
+}
+
+/** inverse_round ()
+ * rounds off 1/n to k decimal places
+ * integer part of 10^k / n
+ */
+void inverse_round (unsigned n, unsigned k) {
+	unsigned b = 1;
+	printf (".");
+	while (k > 0) {
+		unsigned a = 10 * b / n;
+		printf ("%u", a);
+		b = (10 * b) % n;
+		k--;
+	}
+	printf ("\n");
+}
+
+/** period ()
+ * find period of the fraction part of 1/n
+ */
+void period (unsigned n) {
+	if (n < 2)
+		return;
+
+	unsigned m = 0, b = 1;
+	char * buf = (char *) malloc (sizeof (char) * (n + 1) * 2);
+	unsigned * qs = (unsigned *) malloc (sizeof (unsigned) * n);
+	qs[b] = 1, qs[0] = 1;
+	
+	while (m < n + 1) {
+		unsigned q = 10 * b / n;
+		unsigned r = (10 * b) % n;
+		buf[m++] = q + '0';	
+		if (qs[r])
+			break;
+		else {			
+			qs[r] = true;
+			b = r;
+		}
+	}
+
+	buf[m] = '\0';
+	printf ("1/%u = .%s'\n period of 1/%u = %u\n", n, buf, n, m);
+	free (buf);
+}
+
 void test_numbers () {
 	// unsigned d = 173;
 	// printf ("reverse of %u = %u\n", d, reverse_num (d, 10));
-	find_circles_within (5);
+	// find_circles_within (5);
+	// factors (768);
+	// inverse_round (7, 10);
+	
+	for (unsigned i = 11; i <= 37; i++)
+		period (i);
 }
 
 void run_tests () {
