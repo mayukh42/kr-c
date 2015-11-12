@@ -42,7 +42,7 @@ List * create_List (int * xs, unsigned n) {
 void delete_List (List * list) {
 	if (list != NULL) {
 		delete_List (list->next);
-		free (list);
+		delete_Node (list);
 	}
 }
 

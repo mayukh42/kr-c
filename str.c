@@ -236,7 +236,7 @@ void boyer_moore (char * text, char * pat) {
 		last_idx[i] = -1;
 	
 	for (unsigned i = 0; i < m; i++)
-		last_idx[pat[i]] = i;
+		last_idx[(int) pat[i]] = i;		// cast to avoid -Wchar-subscripts
 
 	unsigned i = 0;
 	while (i < n - m + 1) {
@@ -248,8 +248,8 @@ void boyer_moore (char * text, char * pat) {
 			printf ("shift occurs at %u for '%s'\n", i, pat);
 			i++;
 		} else {
-			if (last_idx[text[i + j]] != -1)
-				i += j - last_idx[text[i + j]];
+			if (last_idx[(int) text[i+j]] != -1)
+				i += j - last_idx[(int) text[i+j]];
 			else
 				i += m;
 		}		
