@@ -58,7 +58,7 @@ void * dequeue (Queue * q) {
 	return item;
 }
 
-int is_empty (Queue * q) {
+int is_Queue_empty (Queue * q) {
 	if (q)
 		return !q->size;
 	return 0;
@@ -68,7 +68,7 @@ int is_empty (Queue * q) {
  */
 void delete_Queue (Queue * q) {
 	if (q) {
-		while (!is_empty (q))
+		while (!is_Queue_empty (q))
 			dequeue (q);
 		free (q);
 	}

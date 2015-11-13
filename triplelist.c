@@ -1,12 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "triplelist.h"
+#include "queue.h"
 
 /** author: mayukh
  * github.com/mayukh42
  */
 
-void test_create_TList () {
+/** build_List ()
+ * Build this list:
+ 	5 <--> 33 <--> 17 <--> 2 <--> 1
+ 	|					   |
+ 	6 <--> 25 <--> 6 	   2 <--> 7
+ 		   |	   | 	   | 
+ 		   8 	   9 	   12 <--> 5
+ 		   		   | 	   | 
+ 		   		   7 	   21 <--> 3
+ * flatten () should produce
+	5 <--> 33 <--> 17 <--> 2 <--> 1 <--> 6 <--> 25 <--> 6 <--> 2 <--> 7 <--> 8 <--> 9 <--> 12 <--> 5 <--> 7 <--> 21 <--> 3
+	while preserving the child relationships
+ */
+TList * build_TList () {
 	int x0s[] = {5,33,17,2,1};
 	TList * list0 = create_List_from_Array (NULL, x0s, 5);
 
@@ -41,11 +56,84 @@ void test_create_TList () {
 	list4->child = list6;
 	list5->child = list7;
 
-	print_TList (list0);
+	return list0;
+}
+
+/** flatten ()
+ * Flatten a 2D list to a single horizontal level
+ * preserve child relationships
+ */
+TList * flatten (TList * list) {
+	Queue * q = create_Queue ();
+	TList * it = list;
+	while (it) {
+		if (it->child)
+			enqueue (q, it->child);
+		if (!it->next) {
+			TList * next = (TList *) dequeue (q);
+			it->next = next;
+			if (next) 
+				next->prev = it;
+		}
+		it = it->next;
+	}
+	delete_Queue (q);
+	return list;
+}
+
+/** unflatten ()
+ * Unflatten the list back to its original shape
+ * i.e. inverse of the fn flatten ()
+ * unflatten () on original list returns the same list
+ */
+TList * unflatten (TList * list) {
+	Queue * q = create_Queue ();
+	TList * it = list;
+	while (it) {
+		if (it->child) {
+			TList * last = it->child->prev;
+			if (last) 
+				last->next = NULL;
+			it->child->prev = NULL;
+			enqueue (q, it->child);
+		}
+		if (!it->next) {
+			TList * next = (TList *) dequeue (q);
+			it = next;
+		}
+		else
+			it = it->next;
+	}
+	delete_Queue (q);
+	return list;
+}
+
+/** tests
+ */
+void test_flatten_unflatten () {
+	TList * list = build_TList ();
+	printf ("Original: \n");
+	print_TList (list, print_TNode_rec);
+	
+	list = flatten (list);
+	printf ("Flattened: \n");
+	print_TList (list, print_TNode_flattened);
+
+	list = unflatten (list);
+	printf ("Unflattened (i.e. Original): \n");
+	print_TList (list, print_TNode_rec);
+
+	delete_TList (list);
+}
+
+void test_create_TList () {
+	TList * list = build_TList ();
+	print_TList (list, print_TNode_rec);
 }
 
 void run_tests() {
-	test_create_TList ();
+	// test_create_TList ();
+	test_flatten_unflatten ();
 }
 
 int main() {
