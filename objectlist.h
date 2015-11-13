@@ -18,13 +18,13 @@ int * wrap_Item (int v) {
 }
 
 void delete_Item (int * item) {
-	if (!item)
+	if (item)
 		free (item);
 }
 
 // override for different item type
 void print_Item (int * item) {
-	if (!item)
+	if (item)
 		printf ("%d ", * item);
 }
 
@@ -37,17 +37,15 @@ typedef struct OList {
 } OList;
 
 OList * create_Node (void * item) {
-	OList * node = (OList *) malloc (sizeof(OList));
+	OList * node = (OList *) malloc (sizeof (OList));
 	node->item = item;
 	node->next = NULL;
 	return node;
 }
 
 void delete_Node (OList * node) {
-	if (!node) {
-		delete_Item (node->item);
+	if (node) 
 		free (node);
-	}
 }
 
 OList * create_OList (void ** items, unsigned n) {
@@ -63,7 +61,7 @@ OList * create_OList (void ** items, unsigned n) {
 }
 
 void delete_OList (OList * list) {
-	if (!list) {
+	if (list) {
 		delete_OList (list->next);
 		delete_Node (list);
 	}
@@ -80,17 +78,6 @@ void print_OList (OList * list) {
 	printf ("[");
 	print_Nodes (list);
 	printf ("]\n");
-}
-
-// test utility - for int items
-OList * create_OList_from_Array () {
-	int n = 8;
-	void ** items = (void **) malloc (sizeof (void *) * n);
-	for (int i = 0; i < n; i++)
-		items[i] = wrap_Item (i + 1);
-
-	OList * xs_list = create_OList (items, n);
-	return xs_list;
 }
 
 #endif

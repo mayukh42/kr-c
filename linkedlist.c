@@ -78,10 +78,21 @@ void test_create () {
 	delete_List (xs_list);
 }
 
+void test_reverse () {
+	List * xs = create_list_from_array ();
+	print_List (xs);
+
+	xs = reverse (xs);
+	print_List (xs);
+
+	delete_List (xs);
+}
+
 void run_tests () {
 	// test_create ();
 	// test_m_from_last ();
-	test_detect_cycle ();
+	// test_detect_cycle ();
+	test_reverse ();
 }
 
 int main () {

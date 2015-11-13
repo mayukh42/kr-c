@@ -1,29 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "objectlist.h"
+#include "queue.h"
 
 /** author: mayukh
  * github.com/mayukh42
  */
 
-void test_basic_OList () {
+void test_basic_Queue () {
 	int n = 8;
 	void ** items = (void **) malloc (sizeof (void *) * n);
 	for (int i = 0; i < n; i++)
 		items[i] = wrap_Item (i + 1);
 
-	OList * xs_list = create_OList (items, n);	
+	OList * list = create_OList (items, n);		
+	OList * head = list;
 
-	print_OList (xs_list);
-	delete_OList (xs_list); 
+	Queue * q = create_Queue ();
+	while (list) {
+		enqueue (q, list->item);
+		list = list->next;
+	}
+	
+	print_Queue (q);
+
+	delete_Queue (q);
+	delete_OList (head);
 
 	for (int i = 0; i < n; i++)
 		delete_Item (items[i]);
-	free (items);
+	free (items);	
 }
 
 void run_tests() {
-	test_basic_OList ();	
+	test_basic_Queue ();
 }
 
 int main() {

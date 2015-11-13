@@ -23,12 +23,12 @@ List * create_Node (int v) {
 }
 
 void delete_Node (List * node) {
-	if (node != NULL)
+	if (node)
 		free (node);
 }
 
 List * create_List (int * xs, unsigned n) {
-	if (xs == NULL)
+	if (!xs)
 		return NULL;
 
 	List * curr = create_Node (*xs);
@@ -40,14 +40,14 @@ List * create_List (int * xs, unsigned n) {
 }
 
 void delete_List (List * list) {
-	if (list != NULL) {
+	if (list) {
 		delete_List (list->next);
 		delete_Node (list);
 	}
 }
 
 void print_Nodes (List * list) {
-	if (list == NULL)
+	if (!list)
 		return;
 	printf ("%d, ", list->val);
 	print_Nodes (list->next);
@@ -57,6 +57,19 @@ void print_List (List * list) {
 	printf ("[");
 	print_Nodes (list);
 	printf ("]\n");
+}
+
+List * reverse_rec (List * list, List * acc) {
+	if (!list)
+		return acc;
+	List * _this = list;
+	List * _next = _this->next;
+	_this->next = acc;
+	return reverse_rec (_next, _this);
+}
+
+List * reverse (List * list) {
+	return reverse_rec (list, NULL);
 }
 
 // test utility

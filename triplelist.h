@@ -22,7 +22,7 @@ TList * create_Node (int value) {
 }
 
 void add_Child (TList * list, TList * child) {
-	if (list == NULL)
+	if (!list)
 		return;
 
 	list->child = child;
@@ -30,7 +30,7 @@ void add_Child (TList * list, TList * child) {
 
 // pattern to implement recursive create
 TList * append_Node (TList * list, TList * node) {
-	if (node == NULL || list == NULL)
+	if (!node || !list)
 		return list;
 
 	node->prev = list;
@@ -39,7 +39,7 @@ TList * append_Node (TList * list, TList * node) {
 }
 
 TList * prepend_Node (TList * list, TList * node) {
-	if (node == NULL || list == NULL)
+	if (!node || !list)
 		return list;
 
 	node->next = list;
@@ -48,7 +48,7 @@ TList * prepend_Node (TList * list, TList * node) {
 }
 
 TList * create_List_from_Array (TList * prev, int * xs, int n) {
-	if (n <= 0 || xs == NULL)
+	if (n <= 0 || !xs)
 		return NULL;
 
 	TList * list = create_Node (* xs);
@@ -67,7 +67,7 @@ TList * create_List_from_Array (TList * prev, int * xs, int n) {
  * NULL neighbors are represented by -1
  */
 void print_Node (TList * node) {
-	if (node != NULL) {
+	if (node) {
 		int n = node->next != NULL ? node->next->val : -1;
 		int p = node->prev != NULL ? node->prev->val : -1;
 		int c = node->child != NULL ? node->child->val : -1;
@@ -76,7 +76,7 @@ void print_Node (TList * node) {
 }
 
 void print_Node_rec (TList * list) {
-	if (list != NULL) {
+	if (list) {
 		print_Node (list);
 		print_Node_rec (list->child);
 		print_Node_rec (list->next);
